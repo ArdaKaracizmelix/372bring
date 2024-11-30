@@ -35,38 +35,45 @@ const MenuPage = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [menuItems, setMenuItems] = useState([]);
   const [restaurantName, setRestaurantName] = useState(""); // Restoran adını tutmak için state
+  const [promotions, setPromotions] = useState([]); // State to store promotions
   const [loading, setLoading] = useState(true); // Yükleniyor durumunu izler
   const [error, setError] = useState(""); // Hata durumunu izler
   const { restaurantId } = useParams(); // URL'den restaurantId alın
   const navigate = useNavigate();
 
-  // Menü ve restoran bilgilerini çek
+  // Menü ve restoran ve promotion bilgilerini çek
   useEffect(() => {
-    const fetchMenu = async () => {
+    const fetchMenuAndPromotions = async () => {
       try {
-        setLoading(true); 
-        setError(""); 
-
-        // Menü verilerini getir
+        setLoading(true);
+        setError("");
+  
+        // Fetch menu data
         const menuResponse = await axios.get(
           `http://localhost:5000/restaurants/${restaurantId}/menus`
         );
         setMenuItems(menuResponse.data);
-
-      
+  
+        // Fetch restaurant info
         const restaurantResponse = await axios.get(
           `http://localhost:5000/restaurants/${restaurantId}`
         );
         setRestaurantName(restaurantResponse.data.name);
+  
+        // Fetch promotions
+        const promotionsResponse = await axios.get(
+          `http://localhost:5000/restaurants/${restaurantId}/promotions`
+        );
+        setPromotions(promotionsResponse.data); // Store promotions
       } catch (err) {
-        console.error("Error fetching menu or restaurant info:", err);
+        console.error("Error fetching data:", err);
         setError("Failed to load menu or restaurant information.");
       } finally {
-        setLoading(false); 
+        setLoading(false);
       }
     };
-
-    fetchMenu();
+  
+    fetchMenuAndPromotions();
   }, [restaurantId]);
 
   const handleDarkModeToggle = () => setDarkMode(!darkMode);
@@ -194,6 +201,47 @@ const MenuPage = () => {
             >
               {restaurantName}'s Menu
             </Typography>
+
+
+          {/* Promotions Section */}
+          <Box sx={{ marginBottom: "24px" }}>
+            <Typography
+              variant="h5"
+              align="center"
+              sx={{ marginBottom: "16px", fontWeight: "bold" }}
+            >
+              Active Promotions
+            </Typography>
+            {promotions.length > 0 ? (
+              <TableContainer component={Paper}>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell sx={{ fontWeight: "bold" }}>Promo Code</TableCell>
+                      <TableCell sx={{ fontWeight: "bold" }}>Discount</TableCell>
+                      <TableCell sx={{ fontWeight: "bold" }}>Description</TableCell>
+                      <TableCell sx={{ fontWeight: "bold" }}>Valid Until</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {promotions.map((promo, index) => (
+                      <TableRow key={index}>
+                        <TableCell>{promo.promo_code}</TableCell>
+                        <TableCell>{promo.discount_value}%</TableCell>
+                        <TableCell>{promo.description}</TableCell>
+                        <TableCell>{new Date(promo.end_date).toLocaleDateString()}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            ) : (
+              <Alert severity="info" sx={{ marginTop: "20px" }}>
+                No promotions available for this restaurant.
+              </Alert>
+            )}
+          </Box>
+
 
             <TableContainer component={Paper}>
               <Table>

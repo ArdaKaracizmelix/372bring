@@ -335,22 +335,57 @@ def add_promotion():
     except SQLAlchemyError as e:
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
-
-# Get all promotions for a specific restaurant
-@routes.route('/restaurants/<int:restaurant_id>/promotions', methods=['GET'])
-def get_promotions(restaurant_id):
+    
+# Get all promotions
+@routes.route('/promotions', methods=['GET'])
+def get_promotions():
     try:
-        promotions = Promotions.query.filter_by(restaurant_id=restaurant_id).all()
+        promotions = Promotions.query.all()
         return jsonify([{
             'promotion_id': p.promotion_id,
-            'promo_code': p.promo_code,
-            'discount_value': p.discount_value,
-            'description': p.description,
-            'promotion_end_date': p.promotion_end_date,
-            'applicable_restaurants': p.applicable_restaurants
+                'promo_code': p.promo_code,
+                'discount_value': p.discount_value,
+                'description': p.description,
+                'start_date': p.start_date,
+                'end_date': p.end_date,
+                'applicable_restaurants': p.applicable_restaurants
         } for p in promotions]), 200
     except SQLAlchemyError as e:
         return jsonify({"error": str(e)}), 500
+
+@routes.route('/restaurants/<int:restaurant_id>/promotions', methods=['GET'])
+def get_restaurant_promotions(restaurant_id):
+    try:
+        print(f"Fetching promotions for restaurant_id: {restaurant_id}")  # Debug log
+
+        promotions = (
+            Promotions.query.filter(
+                Promotions.applicable_restaurants.like(f'%, {restaurant_id}, %') |
+                Promotions.applicable_restaurants.like(f'{restaurant_id}, %') |
+                Promotions.applicable_restaurants.like(f'%, {restaurant_id}') |
+                (Promotions.applicable_restaurants == str(restaurant_id))
+            ).all()
+        )
+        print(f"Promotions fetched: {promotions}")  # Debug log
+
+        if not promotions:
+            return jsonify({"message": "No promotions found for this restaurant."}), 404
+
+        return jsonify([
+            {
+                'promotion_id': p.promotion_id,
+                'promo_code': p.promo_code,
+                'discount_value': p.discount_value,
+                'description': p.description,
+                'start_date': p.start_date,
+                'end_date': p.end_date,
+                'applicable_restaurants': p.applicable_restaurants
+            } for p in promotions
+        ]), 200
+    except SQLAlchemyError as e:
+        return jsonify({"error": str(e)}), 500
+
+
 
 @routes.route('/orders', methods=['POST'])
 def add_order():

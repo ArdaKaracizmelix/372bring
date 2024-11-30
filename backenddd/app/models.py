@@ -18,7 +18,7 @@ class Restaurants(db.Model):
     contact_number = db.Column(db.String(20), nullable=False)
     #email = db.Column(db.String(100), nullable=False)
     menus = db.relationship('Menus', backref='restaurant', lazy=True)
-    promotions = db.relationship('Promotions', backref='restaurant', lazy=True)
+    #promotions = db.relationship('Promotions', backref='restaurant', lazy=True)
     orders = db.relationship('Orders', backref='restaurant', lazy=True)
 
 # Menus Table
@@ -35,12 +35,13 @@ class Promotions(db.Model):
     __tablename__ = 'promotions'
 
     promotion_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    restaurant_id = db.Column(db.Integer, db.ForeignKey('restaurants.restaurant_id'), nullable=False)
+    #restaurant_id = db.Column(db.Integer, db.ForeignKey('restaurants.restaurant_id'), nullable=False)
     usage_limit = db.Column(db.Integer, nullable=True)
     promo_code = db.Column(db.String(20), nullable=False)
     discount_value = db.Column(db.Numeric(10, 2), nullable=False)
     description = db.Column(db.Text, nullable=True)
-    promotion_end_date = db.Column(db.Date, nullable=True)
+    start_date = db.Column(db.Date, nullable=True)
+    end_date = db.Column(db.Date, nullable=True)
     applicable_restaurants = db.Column(db.JSON, nullable=True)  # JSON array for applicable restaurants
 
 # Payments Table
