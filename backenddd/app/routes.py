@@ -11,7 +11,8 @@ from flask_cors import CORS
 #app = Flask(__name__)
 #routes = Blueprint('routes', __name__)
 routes = Blueprint('routes', __name__)
-CORS(routes, resources={r"/customers": {"origins": "http://localhost:3000"}})
+#CORS(routes, resources={r"/customers": {"origins": "http://localhost:3000"}})
+CORS(routes, resources={r"/*": {"origins": "http://localhost:3000"}})
 
 
 # Initialize the database
@@ -275,23 +276,45 @@ def get_customers():
         return jsonify({"error": str(e)}), 500
 
 # Get a specific customer by ID
-@routes.route('/customers/<int:id>', methods=['GET'])
-def get_customer(id):
+# @routes.route('/customers/<int:id>', methods=['GET'])
+# def get_customer(id):
+#     try:
+#         customer = Customers.query.get_or_404(id)
+#         return jsonify({
+#             #'id': customer.id,
+#             'customer_id': customer.customer_id,
+#             'name': customer.name,
+#             'email': customer.email,
+#             'phone': customer.phone,
+#             'address': customer.address,
+#             #'location': customer.location,  # Convert to a readable format if necessary
+#             'password': customer.password  # Do not expose passwords in the response
+#         }), 200
+#     except SQLAlchemyError as e:
+#         return jsonify({"error": str(e)}), 500
+
+
+@routes.route('/customers/<int:customer_id>', methods=['GET'])
+def get_customer(customer_id):
     try:
-        customer = Customers.query.get_or_404(id)
+        customer = Customers.query.filter_by(customer_id=customer_id).first()
+        if not customer:
+            return jsonify({"message": "Customer not found"}), 404
+
         return jsonify({
-            #'id': customer.id,
             'customer_id': customer.customer_id,
             'name': customer.name,
             'email': customer.email,
             'phone': customer.phone,
             'address': customer.address,
-            #'location': customer.location,  # Convert to a readable format if necessary
-            'password': customer.password  # Do not expose passwords in the response
+            # Uncomment if location handling is required
+            #'location': {
+            #    'longitude': loads(db.session.scalar(ST_AsText(ST_SetSRID(customer.location, 4326)))).x,
+            #    'latitude': loads(db.session.scalar(ST_AsText(ST_SetSRID(customer.location, 4326)))).y
+            #},
         }), 200
     except SQLAlchemyError as e:
         return jsonify({"error": str(e)}), 500
-
 
 # Add a new menu
 @routes.route('/menus', methods=['POST'])

@@ -22,6 +22,14 @@ const Login = () => {
         if (response.ok) {
             const data = await response.json();
             console.log('Login successful:', data);
+
+            // Store the customer_id in localStorage
+            if (data.user_id) {
+              localStorage.setItem('user_id', data.user_id);
+              console.log('User ID saved to localStorage:', data.user_id);
+            } else {
+              console.error('No user_id returned from server.');
+            }
             navigate('/Dashboard'); // Giriş başarılıysa dashboard'a yönlendir
         } else {
             alert('Invalid email or password'); // Hata mesajını göster

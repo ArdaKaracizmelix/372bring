@@ -1,11 +1,11 @@
-from models import db, Restaurant, Promotion, Order, Payment, Menu, Driver, Customer, DeliveryLocation
+from models import db, Restaurants, Promotions, Orders, Payments, Menus, Drivers, Customers, DeliveryLocations
 from sqlalchemy.exc import SQLAlchemyError
 
 
 # Create a new restaurant
 def create_restaurant(name, address, contact_number, opening_hours):
     try:
-        new_restaurant = Restaurant(
+        new_restaurant = Restaurants(
             name=name,
             address=address,
             contact_number=contact_number,
@@ -21,7 +21,7 @@ def create_restaurant(name, address, contact_number, opening_hours):
 # Get restaurant by ID
 def get_restaurant_by_id(restaurant_id):
     try:
-        restaurant = Restaurant.query.get(restaurant_id)
+        restaurant = Restaurants.query.get(restaurant_id)
         if restaurant:
             return restaurant
         else:
@@ -32,7 +32,7 @@ def get_restaurant_by_id(restaurant_id):
 # Create a new promotion
 def create_promotion(promo_code, discount_value, start_date, end_date, applicable_restaurants, usage_limit, description):
     try:
-        new_promotion = Promotion(
+        new_promotion = Promotions(
             promo_code=promo_code,
             discount_value=discount_value,
             start_date=start_date,
@@ -51,7 +51,7 @@ def create_promotion(promo_code, discount_value, start_date, end_date, applicabl
 # Get promotion by promo_code
 def get_promotion_by_code(promo_code):
     try:
-        promotion = Promotion.query.filter_by(promo_code=promo_code).first()
+        promotion = Promotions.query.filter_by(promo_code=promo_code).first()
         return promotion
     except SQLAlchemyError as e:
         return str(e)
@@ -60,7 +60,7 @@ def get_promotion_by_code(promo_code):
 # Create a new order
 def create_order(restaurant_id, customer_id, order_details, order_status, menu_data):
     try:
-        new_order = Order(
+        new_order = Orders(
             restaurant_id=restaurant_id,
             customer_id=customer_id,
             order_details=order_details,
@@ -77,7 +77,7 @@ def create_order(restaurant_id, customer_id, order_details, order_status, menu_d
 # Update order status
 def update_order_status(order_id, new_status):
     try:
-        order = Order.query.get(order_id)
+        order = Orders.query.get(order_id)
         if order:
             order.order_status = new_status
             db.session.commit()
@@ -91,7 +91,7 @@ def update_order_status(order_id, new_status):
 # Get all orders by customer ID
 def get_orders_by_customer(customer_id):
     try:
-        orders = Order.query.filter_by(customer_id=customer_id).all()
+        orders = Orders.query.filter_by(customer_id=customer_id).all()
         return orders
     except SQLAlchemyError as e:
         return str(e)
@@ -100,7 +100,7 @@ def get_orders_by_customer(customer_id):
 # Create a new payment
 def create_payment(order_id, amount, payment_method, customer_id):
     try:
-        new_payment = Payment(
+        new_payment = Payments(
             order_id=order_id,
             amount=amount,
             payment_method=payment_method,
@@ -116,7 +116,7 @@ def create_payment(order_id, amount, payment_method, customer_id):
 # Get payment by order ID
 def get_payment_by_order(order_id):
     try:
-        payment = Payment.query.filter_by(order_id=order_id).first()
+        payment = Payments.query.filter_by(order_id=order_id).first()
         return payment
     except SQLAlchemyError as e:
         return str(e)
@@ -125,7 +125,7 @@ def get_payment_by_order(order_id):
 # Update driver availability status
 def update_driver_status(driver_id, status):
     try:
-        driver = Driver.query.get(driver_id)
+        driver = Drivers.query.get(driver_id)
         if driver:
             driver.availability_status = status
             db.session.commit()
@@ -140,7 +140,7 @@ def update_driver_status(driver_id, status):
 # Create a new customer
 def create_customer(name, address, email, phone):
     try:
-        new_customer = Customer(
+        new_customer = Customers(
             name=name,
             address=address,
             email=email,
@@ -156,7 +156,7 @@ def create_customer(name, address, email, phone):
 # Get customer by ID
 def get_customer_by_id(customer_id):
     try:
-        customer = Customer.query.get(customer_id)
+        customer = Customers.query.get(customer_id)
         return customer
     except SQLAlchemyError as e:
         return str(e)
@@ -165,7 +165,7 @@ def get_customer_by_id(customer_id):
 # Create a new delivery location
 def create_delivery_location(order_id, location, estimated_delivery_time):
     try:
-        new_location = DeliveryLocation(
+        new_location = DeliveryLocations(
             order_id=order_id,
             delivery_location=location,
             estimated_delivery_time=estimated_delivery_time

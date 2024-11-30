@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Typography,
@@ -20,11 +20,35 @@ import DarkModeIcon from "@mui/icons-material/DarkMode";
 import LightModeIcon from "@mui/icons-material/LightMode";
 import logo from "./assets/logo.png";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const Accounts = () => {
   const [darkMode, setDarkMode] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [customerData, setCustomerData] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchCustomerData = async () => {
+      try {
+        const user_id = localStorage.getItem("user_id"); // Assuming customer ID is stored in localStorage
+        const response = await axios.get(`http://localhost:5000/customers/${user_id}`);
+        setCustomerData(response.data);
+      } catch (err) {
+        setError("Failed to load customer data.");
+        console.error("Error fetching customer data:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCustomerData();
+  }, []);
 
   const handleDarkModeToggle = () => {
     setDarkMode((prevMode) => !prevMode);
@@ -34,12 +58,75 @@ const Accounts = () => {
     setDrawerOpen(open);
   };
 
-  const handleSaveChanges = () => {
-    alert("Changes saved!");
+  const handleSaveChanges = async () => {
+    // Update the user's information (name, phone, email, etc.)
+    try {
+      const user_id = localStorage.getItem("user_id");
+      const updatedData = {
+        name: customerData.name,
+        phone: customerData.phone,
+        email: customerData.email,
+        address: customerData.address,
+      };
+
+      // Send updated user data to the backend
+      const response = await axios.put(`http://localhost:5000/customers/${user_id}`, updatedData);
+
+      if (response.status === 200) {
+        alert("Changes saved successfully!");
+      } else {
+        alert("Failed to save changes.");
+      }
+    } catch (err) {
+      console.error("Error saving changes:", err);
+      alert("Error saving changes.");
+    }
   };
 
-  const handleAccountDeletion = () => {
-    alert("Account deleted!");
+  const handlePasswordChange = async () => {
+    if (newPassword !== confirmPassword) {
+      alert("Passwords do not match.");
+      return;
+    }
+
+    // Send password change request to the server
+    try {
+      const user_id = localStorage.getItem("user_id");
+      const response = await axios.put(`http://localhost:5000/customers/change-password`, {
+        user_id,
+        currentPassword,
+        newPassword,
+      });
+
+      if (response.status === 200) {
+        alert("Password updated successfully!");
+      } else {
+        alert("Failed to update password.");
+      }
+    } catch (err) {
+      console.error("Error changing password:", err);
+      alert("Error changing password.");
+    }
+  };
+
+  const handleAccountDeletion = async () => {
+    if (window.confirm("Are you sure you want to delete your account? This action cannot be undone.")) {
+      try {
+        const user_id = localStorage.getItem("user_id");
+        const response = await axios.delete(`http://localhost:5000/customers/${user_id}`);
+
+        if (response.status === 200) {
+          alert("Account deleted successfully.");
+          localStorage.removeItem("user_id");
+          navigate("/"); // Redirect to home or login page
+        } else {
+          alert("Failed to delete account.");
+        }
+      } catch (err) {
+        console.error("Error deleting account:", err);
+        alert("Error deleting account.");
+      }
+    }
   };
 
   return (
@@ -152,53 +239,101 @@ const Accounts = () => {
           padding: "16px",
         }}
       >
-        {/* Form Section */}
-        <Box
-          sx={{
-            width: "90%",
-            maxWidth: "800px",
-            backgroundColor: darkMode ? "#202020" : "#ffffff",
-            borderRadius: "12px",
-            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-            padding: "24px",
-            margin: "16px",
-          }}
-        >
-          <Typography variant="h5" align="center" sx={{ marginBottom: "16px" }}>
-            My Account
-          </Typography>
-          <Box sx={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-            <TextField disabled defaultValue="yekta" label="First Name" fullWidth />
-            <TextField disabled defaultValue="kumap" label="Last Name" fullWidth />
-            <TextField disabled defaultValue="555-555-5555" label="Phone Number" fullWidth />
-            <TextField disabled defaultValue="test@example.com" label="Email" fullWidth />
-          </Box>
-          <Typography variant="h5" sx={{ marginTop: "32px", marginBottom: "16px" }}>
-            Password
-          </Typography>
-          <Box sx={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-            <TextField label="Current Password" type="password" fullWidth />
-            <TextField label="New Password" type="password" fullWidth />
+        {loading ? (
+          <Typography>Loading...</Typography>
+        ) : error ? (
+          <Typography color="error">{error}</Typography>
+        ) : (
+          <Box
+            sx={{
+              width: "90%",
+              maxWidth: "800px",
+              backgroundColor: darkMode ? "#202020" : "#ffffff",
+              borderRadius: "12px",
+              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+              padding: "24px",
+              margin: "16px",
+            }}
+          >
+            <Typography variant="h5" align="center" sx={{ marginBottom: "16px" }}>
+              My Account
+            </Typography>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+              <TextField
+                disabled
+                value={customerData.name || ""}
+                label="Name"
+                fullWidth
+              />
+              <TextField
+                disabled
+                value={customerData.phone || ""}
+                label="Phone Number"
+                fullWidth
+              />
+              <TextField
+                disabled
+                value={customerData.email || ""}
+                label="Email"
+                fullWidth
+              />
+              <TextField
+                disabled
+                value={customerData.address || ""}
+                label="Address"
+                fullWidth
+              />
+              {/* Password change fields */}
+              <TextField
+                type="password"
+                label="Current Password"
+                fullWidth
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+              />
+              <TextField
+                type="password"
+                label="New Password"
+                fullWidth
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+              />
+              <TextField
+                type="password"
+                label="Confirm New Password"
+                fullWidth
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+              />
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handlePasswordChange}
+                sx={{ marginTop: 2 }}
+              >
+                Change Password
+              </Button>
+            </Box>
+            <Button
+              variant="outlined"
+              color="error"
+              fullWidth
+              sx={{ marginTop: 2 }}
+              onClick={handleAccountDeletion}
+            >
+              Delete Account
+            </Button>
             <Button
               variant="contained"
-              sx={{
-                backgroundColor: darkMode ? "#666" : "#FF6F61",
-                "&:hover": {
-                  backgroundColor: darkMode ? "#777" : "#FF6F61",
-                },
-              }}
+              color="primary"
+              fullWidth
+              sx={{ marginTop: 2 }}
               onClick={handleSaveChanges}
             >
               Save Changes
             </Button>
           </Box>
-          <Typography variant="h5" sx={{ marginTop: "32px", marginBottom: "16px" }}>
-            Account Deletion
-          </Typography>
-          <Button variant="contained" color="error" onClick={handleAccountDeletion}>
-            Delete My Account
-          </Button>
-        </Box>
+        )}
       </Box>
 
       {/* Footer */}

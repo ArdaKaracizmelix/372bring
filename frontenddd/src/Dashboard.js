@@ -30,26 +30,33 @@ import restaurant5 from "./assets/restaurant5.png";
 import slide1 from "./assets/dashboardkampanya1.jpg";
 import slide2 from "./assets/dashboardkampanya2.png";
 import slide3 from "./assets/dashboardkampanya3.jpg";
+
 import { useNavigate } from "react-router-dom";
+import axios from "axios"; // Import axios to fetch data from the API
+
+const slides = [slide1, slide2, slide3];
 
 const Dashboard = () => {
   const [darkMode, setDarkMode] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [restaurantIndex, setRestaurantIndex] = useState(0);
+  const [restaurants, setRestaurants] = useState([]); // State to hold fetched restaurant data
   const navigate = useNavigate();
 
-  // Slider images
-  const slides = [slide1, slide2, slide3];
+  // Fetch restaurant data from API
+  useEffect(() => {
+    const fetchRestaurants = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/restaurants"); // Replace with your API endpoint
+        setRestaurants(response.data); // Set the state with the fetched restaurant data
+      } catch (error) {
+        console.error("Error fetching restaurant data:", error);
+      }
+    };
 
-  // Restaurant data
-  const restaurants = [
-    { id: 1, name: "Burger King ", image: restaurant1 },
-    { id: 2, name: "Domino's Pizza", image: restaurant2 },
-    { id: 3, name: "Usta Dönerci", image: restaurant3 },
-    { id: 4, name: "Popeyes", image: restaurant4 },
-    { id: 5, name: "KFC", image: restaurant5 },
-  ];
+    fetchRestaurants();
+  }, []);
 
   // Dark mode toggle
   const handleDarkModeToggle = () => setDarkMode(!darkMode);
@@ -60,10 +67,10 @@ const Dashboard = () => {
   // Slider interval
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentSlide((prevSlide) => (prevSlide + 1) % slides.length);
+      setCurrentSlide((prevSlide) => (prevSlide + 1) % 3);
     }, 3000);
     return () => clearInterval(interval);
-  }, [slides.length]);
+  }, []);
 
   // Restaurant navigation
   const handleNextRestaurants = () => {
@@ -128,7 +135,7 @@ const Dashboard = () => {
           { text: "Logout", icon: <Logout />, path: "/" }].map((item, index) => (
           <Box
             key={index}
-            onClick={() => navigate(item.path)}//bu pathe şimdilik cart.js i koydum
+            onClick={() => navigate(item.path)}
             sx={{
               display: "flex",
               alignItems: "center",
@@ -209,63 +216,62 @@ const Dashboard = () => {
               width: "100%",
               height: "100%",
               objectFit: "contain",
-              backgroundColor: darkMode ? "#121212" : "#f5f5f5", 
+              backgroundColor: darkMode ? "#121212" : "#f5f5f5",
             }}
           />
         </Box>
 
         {/* Restoran Listesi */}
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                marginTop: "400px", // Daha fazla boşluk için margin artırıldı
-                justifyContent: "center", // Listeyi sayfa ortasına hizalamak için
-              }}
-            >
-              <IconButton onClick={handlePrevRestaurants} disabled={restaurantIndex === 0}>
-                <ArrowBackIos />
-              </IconButton>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            marginTop: "400px",
+            justifyContent: "center",
+          }}
+        >
+          <IconButton onClick={handlePrevRestaurants} disabled={restaurantIndex === 0}>
+            <ArrowBackIos />
+          </IconButton>
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: "repeat(4, 1fr)",
+              gap: 2,
+              flexGrow: 1,
+            }}
+          >
+            {restaurants.slice(restaurantIndex, restaurantIndex + 4).map((restaurant) => (
               <Box
+                key={restaurant.id}
                 sx={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(4, 1fr)",
-                  gap: 2,
-                  flexGrow: 1,
+                  backgroundColor: darkMode ? "#333" : "#fff",
+                  padding: 2,
+                  borderRadius: "8px",
+                  textAlign: "center",
                 }}
               >
-                {restaurants.slice(restaurantIndex, restaurantIndex + 4).map((restaurant) => (
-                  <Box
-                    key={restaurant.id}
-                    sx={{
-                      backgroundColor: darkMode ? "#333" : "#fff",
-                      padding: 2,
-                      borderRadius: "8px",
-                      textAlign: "center",
-                    }}
-                  >
-                    <Box
-                      component="img"
-                      src={restaurant.image}
-                      alt={restaurant.name}
-                      sx={{
-                        width: "100%",
-                        height: "150px",
-                        objectFit: "contain",
-                        borderRadius: "8px",
-                        marginBottom: 2,
-                        backgroundColor: darkMode ? "#121212" : "#ffffff",
-                      }}
-                    />
-                    <Typography sx={{ marginTop: 2 }}>{restaurant.name}</Typography>
-                  </Box>
-                ))}
+                <Box
+                  component="img"
+                  src={restaurant.image}
+                  alt={restaurant.name}
+                  sx={{
+                    width: "100%",
+                    height: "150px",
+                    objectFit: "contain",
+                    borderRadius: "8px",
+                    marginBottom: 2,
+                    backgroundColor: darkMode ? "#121212" : "#ffffff",
+                  }}
+                />
+                <Typography sx={{ marginTop: 2 }}>{restaurant.name}</Typography>
               </Box>
-              <IconButton onClick={handleNextRestaurants} disabled={restaurantIndex + 4 >= restaurants.length}>
-                <ArrowForwardIos />
-              </IconButton>
-            </Box>
-
+            ))}
+          </Box>
+          <IconButton onClick={handleNextRestaurants} disabled={restaurantIndex + 4 >= restaurants.length}>
+            <ArrowForwardIos />
+          </IconButton>
+        </Box>
       </Box>
 
       {/* Footer */}
