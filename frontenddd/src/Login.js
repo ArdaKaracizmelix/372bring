@@ -11,35 +11,36 @@ const Login = () => {
 
   const handleLogin = async () => {
     try {
-        const response = await fetch('http://127.0.0.1:5000/customers/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ email, password }),
-        });
-
-        if (response.ok) {
-            const data = await response.json();
-            console.log('Login successful:', data);
-
-            // Store the customer_id in localStorage
-            if (data.user_id) {
-              localStorage.setItem('user_id', data.user_id);
-              console.log('User ID saved to localStorage:', data.user_id);
-            } else {
-              console.error('No user_id returned from server.');
-            }
-            navigate('/Dashboard'); // Giriş başarılıysa dashboard'a yönlendir
+      const response = await fetch('http://127.0.0.1:5000/customers/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+  
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Login successful:', data);
+  
+        // Kullanıcı ID'sini localStorage'a kaydet
+        if (data.user_id) {
+          localStorage.setItem('user_id', data.user_id);
+          console.log('User ID saved to localStorage:', data.user_id);
         } else {
-            alert('Invalid email or password'); // Hata mesajını göster
+          console.error('No user_id returned from server.');
         }
+  
+        navigate('/Dashboard'); 
+      } else {
+        alert('Invalid email or password'); // Hata mesajını göster
+      }
     } catch (error) {
-        console.error('Error during login:', error);
-        alert('An error occurred. Please try again.');
+      console.error('Error during login:', error);
+      alert('An error occurred. Please try again.');
     }
-};
-
+  };
+  
   
   
   return (

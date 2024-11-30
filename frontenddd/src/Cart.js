@@ -23,6 +23,7 @@ import DarkModeIcon from "@mui/icons-material/DarkMode";
 import LightModeIcon from "@mui/icons-material/LightMode";
 import logo from "./assets/logo.png";
 import { useNavigate } from "react-router-dom";
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 
 const Cart = () => {
   const [darkMode, setDarkMode] = useState(false);
@@ -86,6 +87,7 @@ const Cart = () => {
         {[{ text: "Dashboard", icon: <DashboardIcon />, path: "/Dashboard" },
           { text: "Settings", icon: <Settings />, path: "/Settings" },
           { text: "Cart", icon: <Settings />, path: "/Cart"},
+          { text: "Last Order", icon: <ShoppingCartIcon/>, path: "/LastOrders"},
           { text: "Logout", icon: <Logout />, path: "/" }].map((item, index) => (
           <Box
             key={index}
@@ -132,7 +134,8 @@ const Cart = () => {
             <MenuIcon />
           </IconButton>
           <Typography variant="h6">Cart</Typography>
-          <IconButton>
+          
+          <IconButton onClick={() => navigate("/Accounts")}>
             <Avatar sx={{ backgroundColor: darkMode ? "#505050" : "#FF6F61" }} />
           </IconButton>
         </Toolbar>

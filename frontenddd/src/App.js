@@ -8,6 +8,8 @@ import AboutPage from './AboutPage'; // Yeni About Page
 import ContactPage from './ContactPage'; // Yeni About Page
 import Accounts from './Accounts';
 import Cart from './Cart'
+import LastOrders from './LastOrders';
+import MenuPage from './MenuPage';
 
 const App = () => {
   return (
@@ -20,9 +22,10 @@ const App = () => {
         <Route path="/ContactPage" element={<ContactPage />} />
         <Route path="/Accounts" element={<Accounts />} />
         <Route path="/Cart" element={<Cart />} />
-        {/* Login ve Signup sayfaları */}
+        <Route path="/LastOrders" element={<LastOrders />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/MenuPage/:restaurantId" element={<MenuPage />} />
       </Routes>
     </Router>
   );

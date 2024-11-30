@@ -307,7 +307,7 @@ def get_customer(customer_id):
             'email': customer.email,
             'phone': customer.phone,
             'address': customer.address,
-            # Uncomment if location handling is required
+           
             #'location': {
             #    'longitude': loads(db.session.scalar(ST_AsText(ST_SetSRID(customer.location, 4326)))).x,
             #    'latitude': loads(db.session.scalar(ST_AsText(ST_SetSRID(customer.location, 4326)))).y
@@ -316,39 +316,7 @@ def get_customer(customer_id):
     except SQLAlchemyError as e:
         return jsonify({"error": str(e)}), 500
 
-# Add a new menu
-@routes.route('/menus', methods=['POST'])
-def add_menu():
-    try:
-        data = request.get_json()
-        new_menu = Menus(
-            restaurant_id=data['restaurant_id'],
-            name=data['name'],
-            contact=data['contact'],
-            menu_data=data['menu_data']
-        )
-        db.session.add(new_menu)
-        db.session.commit()
-        return jsonify({"message": "Menu added successfully"}), 201
-    except SQLAlchemyError as e:
-        db.session.rollback()
-        return jsonify({"error": str(e)}), 500
 
-# Get all menus for a specific restaurant
-@routes.route('/restaurants/<int:restaurant_id>/menus', methods=['GET'])
-def get_menus(restaurant_id):
-    try:
-        menus = Menus.query.filter_by(restaurant_id=restaurant_id).all()
-        return jsonify([{
-            'menu_id': m.menu_id,
-            'name': m.name,
-            'contact': m.contact,
-            'menu_data': m.menu_data
-        } for m in menus]), 200
-    except SQLAlchemyError as e:
-        return jsonify({"error": str(e)}), 500
-
-# Add a new promotion
 @routes.route('/promotions', methods=['POST'])
 def add_promotion():
     try:
@@ -384,10 +352,12 @@ def get_promotions(restaurant_id):
     except SQLAlchemyError as e:
         return jsonify({"error": str(e)}), 500
 
-# Add a new order
 @routes.route('/orders', methods=['POST'])
 def add_order():
     try:
+        if not request.is_json:  # Gelen isteğin JSON formatında olup olmadığını kontrol et
+            return jsonify({"error": "Unsupported Media Type. Content-Type must be application/json"}), 415
+
         data = request.get_json()
         new_order = Orders(
             restaurant_id=data['restaurant_id'],
@@ -402,6 +372,7 @@ def add_order():
     except SQLAlchemyError as e:
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
+
 
 # Get all orders for a specific customer
 @routes.route('/customers/<int:customer_id>/orders', methods=['GET'])
@@ -467,3 +438,122 @@ def get_driver_location(driver_id):
         }), 200
     except SQLAlchemyError as e:
         return jsonify({"error": str(e)}), 500
+    
+import json
+@routes.route('/orders', methods=['GET'])
+def get_last_orders():
+    try:
+
+        query = db.session.query(
+            Orders.order_details,
+            Orders.timestamps,
+            Orders.order_status,
+            Restaurants.name.label('restaurant_name')
+        ).join(Restaurants, Orders.restaurant_id == Restaurants.restaurant_id)
+
+        orders = query.all()
+        results = []
+
+        for order in orders:
+            
+            if isinstance(order.order_details, str):
+                try:
+                    order_details_list = json.loads(order.order_details) 
+                except json.JSONDecodeError:
+                    order_details_list = []  
+            else:
+                order_details_list = order.order_details if isinstance(order.order_details, list) else []
+
+        
+            for detail in order_details_list:
+                results.append({
+                    'order_details': detail.get('item', 'Unknown Item'),
+                    'quantity': detail.get('quantity', 0),
+                    'timestamp': order.timestamps.strftime('%Y-%m-%d %H:%M:%S'),
+                    'order_status': order.order_status,
+                    'restaurant_name': order.restaurant_name,
+                })
+
+        return jsonify(results), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@routes.route('/orders/<int:customer_id>', methods=['GET'])
+def get_customer_orders(customer_id):
+    try:
+  
+        query = db.session.query(
+            Orders.order_details,
+            Orders.timestamps,
+            Orders.order_status,
+            Restaurants.name.label('restaurant_name')
+        ).join(Restaurants, Orders.restaurant_id == Restaurants.restaurant_id).filter(
+            Orders.customer_id == customer_id
+        )
+
+        orders = query.all()
+        results = []
+
+        for order in orders:
+         
+            if isinstance(order.order_details, str):
+                try:
+                    order_details_list = json.loads(order.order_details) 
+                except json.JSONDecodeError:
+                    order_details_list = []  
+                order_details_list = order.order_details if isinstance(order.order_details, list) else []
+
+            for detail in order_details_list:
+                results.append({
+                    'order_details': detail.get('item', 'Unknown Item'),
+                    'quantity': detail.get('quantity', 0),
+                    'timestamp': order.timestamps.strftime('%Y-%m-%d %H:%M:%S'),
+                    'order_status': order.order_status,
+                    'restaurant_name': order.restaurant_name,
+                })
+
+        return jsonify(results), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+import json
+from flask import jsonify
+
+@routes.route('/restaurants/<int:restaurant_id>/menus', methods=['GET'])
+def get_menus_by_restaurant(restaurant_id):
+    try:
+     
+        menus = Menus.query.filter_by(restaurant_id=restaurant_id).all()
+
+
+        result = []
+
+  
+        for menu in menus:
+      
+            if isinstance(menu.menu_data, str):
+                try:
+                    menu_items = json.loads(menu.menu_data) 
+                except json.JSONDecodeError:
+                    menu_items = []  
+            elif isinstance(menu.menu_data, list):
+             
+                menu_items = menu.menu_data
+            else:
+               
+                menu_items = []
+
+            for item in menu_items:
+                result.append({
+                    'menu_id': menu.menu_id,
+                    'restaurant_id': menu.restaurant_id,
+                    'availability_status': menu.availability_status,
+                    'item_name': item.get('item_name', 'Unknown Item'),
+                    'description': item.get('description', 'No Description'),
+                    'price': item.get('price', 0.0),
+                })
+
+        # JSON formatında döndür
+        return jsonify(result), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500

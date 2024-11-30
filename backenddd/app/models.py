@@ -27,9 +27,8 @@ class Menus(db.Model):
 
     menu_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     restaurant_id = db.Column(db.Integer, db.ForeignKey('restaurants.restaurant_id'), nullable=False)
-    name = db.Column(db.String(100), nullable=False)
-    contact = db.Column(db.String(20), nullable=False)
     menu_data = db.Column(db.JSON, nullable=False)  # JSON data for menu items
+    availability_status = db.Column(db.Enum('Available', 'Not Available', name='availability_status'), nullable=False)
 
 # Promotions Table
 class Promotions(db.Model):
@@ -64,10 +63,10 @@ class Orders(db.Model):
     restaurant_id = db.Column(db.Integer, db.ForeignKey('restaurants.restaurant_id'), nullable=False)
     customer_id = db.Column(db.Integer, db.ForeignKey('customers.customer_id'), nullable=False)
     order_details = db.Column(db.JSON, nullable=False)  # JSON data for order items
-    order_status = db.Column(db.Enum('Preparing', 'Pending', 'Completed', 'Cancelled', name='order_status'), nullable=False)
+    order_status = db.Column(db.Enum('Preparing', 'Pending', 'Completed', 'Cancelled','On the Way','Delivered',name='order_status'), nullable=False)
     timestamps = db.Column(db.DateTime, default=db.func.current_timestamp(), nullable=False)
     menu_data = db.Column(db.JSON, nullable=False)  # Menu items for the order
-    availability_status = db.Column(db.Enum('Available', 'Unavailable', name='availability_status'), default='Available')
+    #availability_status = db.Column(db.Enum('Available', 'Unavailable', name='availability_status'), default='Available')
 
 # Delivery Locations Table
 class DeliveryLocations(db.Model):

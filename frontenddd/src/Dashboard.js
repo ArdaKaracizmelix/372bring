@@ -19,20 +19,14 @@ import {
 } from "@mui/icons-material";
 import DarkModeIcon from "@mui/icons-material/DarkMode";
 import LightModeIcon from "@mui/icons-material/LightMode";
-import logo from "./assets/logo.png";
-import restaurant1 from "./assets/restaurant1.png";
-import restaurant2 from "./assets/restaurant2.png";
-import restaurant3 from "./assets/restaurant3.jpg";
-import restaurant4 from "./assets/restaurant4.png";
-import restaurant5 from "./assets/restaurant5.png";
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
-// Import slider images
+import logo from "./assets/logo.png";
 import slide1 from "./assets/dashboardkampanya1.jpg";
 import slide2 from "./assets/dashboardkampanya2.png";
 import slide3 from "./assets/dashboardkampanya3.jpg";
-
-import { useNavigate } from "react-router-dom";
-import axios from "axios"; // Import axios to fetch data from the API
 
 const slides = [slide1, slide2, slide3];
 
@@ -41,15 +35,15 @@ const Dashboard = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [restaurantIndex, setRestaurantIndex] = useState(0);
-  const [restaurants, setRestaurants] = useState([]); // State to hold fetched restaurant data
+  const [restaurants, setRestaurants] = useState([]);
   const navigate = useNavigate();
 
-  // Fetch restaurant data from API
+  // Restoran verilerini API'den çek
   useEffect(() => {
     const fetchRestaurants = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/restaurants"); // Replace with your API endpoint
-        setRestaurants(response.data); // Set the state with the fetched restaurant data
+        const response = await axios.get("http://localhost:5000/restaurants");
+        setRestaurants(response.data);
       } catch (error) {
         console.error("Error fetching restaurant data:", error);
       }
@@ -72,7 +66,7 @@ const Dashboard = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // Restaurant navigation
+  // Restoran navigasyonu
   const handleNextRestaurants = () => {
     if (restaurantIndex + 4 < restaurants.length) {
       setRestaurantIndex(restaurantIndex + 4);
@@ -129,10 +123,13 @@ const Dashboard = () => {
             onClick={() => navigate("/")}
           />
         </Box>
-        {[{ text: "Dashboard", icon: <DashboardIcon />, path: "/Dashboard" },
+        {[
+          { text: "Dashboard", icon: <DashboardIcon />, path: "/Dashboard" },
           { text: "Settings", icon: <Settings />, path: "/Settings" },
-          { text: "Cart", icon: <Settings />, path: "/Cart"},
-          { text: "Logout", icon: <Logout />, path: "/" }].map((item, index) => (
+          { text: "Cart", icon: <ShoppingCartIcon />, path: "/Cart" },
+          { text: "Last Order", icon: <ShoppingCartIcon />, path: "/LastOrders" },
+          { text: "Logout", icon: <Logout />, path: "/" },
+        ].map((item, index) => (
           <Box
             key={index}
             onClick={() => navigate(item.path)}
@@ -159,7 +156,11 @@ const Dashboard = () => {
           }}
         >
           <IconButton onClick={handleDarkModeToggle}>
-            {darkMode ? <LightModeIcon sx={{ color: "#f5f5f5" }} /> : <DarkModeIcon sx={{ color: "#000" }} />}
+            {darkMode ? (
+              <LightModeIcon sx={{ color: "#f5f5f5" }} />
+            ) : (
+              <DarkModeIcon sx={{ color: "#000" }} />
+            )}
           </IconButton>
         </Box>
       </SwipeableDrawer>
@@ -170,7 +171,7 @@ const Dashboard = () => {
         elevation={0}
         sx={{
           backgroundColor: darkMode ? "#121212" : "#FF6F61",
-          color: darkMode ? "#f5f5f5" : "#000",
+          color: darkMode ? "#f5f5f5" : "#ffffff",
         }}
       >
         <Toolbar sx={{ justifyContent: "space-between" }}>
@@ -241,32 +242,35 @@ const Dashboard = () => {
               flexGrow: 1,
             }}
           >
-            {restaurants.slice(restaurantIndex, restaurantIndex + 4).map((restaurant) => (
-              <Box
-                key={restaurant.id}
-                sx={{
-                  backgroundColor: darkMode ? "#333" : "#fff",
-                  padding: 2,
-                  borderRadius: "8px",
-                  textAlign: "center",
-                }}
-              >
+           {restaurants.slice(restaurantIndex, restaurantIndex + 4).map((restaurant) => (
                 <Box
-                  component="img"
-                  src={restaurant.image}
-                  alt={restaurant.name}
+                  key={restaurant.restaurant_id} // ID bilgisi burada kullanılıyor
                   sx={{
-                    width: "100%",
-                    height: "150px",
-                    objectFit: "contain",
+                    backgroundColor: darkMode ? "#333" : "#fff",
+                    padding: 2,
                     borderRadius: "8px",
-                    marginBottom: 2,
-                    backgroundColor: darkMode ? "#121212" : "#ffffff",
+                    textAlign: "center",
+                    cursor: "pointer",
                   }}
-                />
-                <Typography sx={{ marginTop: 2 }}>{restaurant.name}</Typography>
-              </Box>
-            ))}
+                  onClick={() => navigate(`/MenuPage/${restaurant.restaurant_id}`)} // ID ile yönlendirme
+                >
+                  <Box
+                    component="img"
+                    src={restaurant.image || "default_image_url"} // Restoranın görseli varsa kullan, yoksa varsayılan görsel
+                    alt={restaurant.name}
+                    sx={{
+                      width: "100%",
+                      height: "150px",
+                      objectFit: "contain",
+                      borderRadius: "8px",
+                      marginBottom: 2,
+                      backgroundColor: darkMode ? "#121212" : "#ffffff",
+                    }}
+                  />
+                  <Typography sx={{ marginTop: 2 }}>{restaurant.name}</Typography>
+                </Box>
+              ))}
+
           </Box>
           <IconButton onClick={handleNextRestaurants} disabled={restaurantIndex + 4 >= restaurants.length}>
             <ArrowForwardIos />

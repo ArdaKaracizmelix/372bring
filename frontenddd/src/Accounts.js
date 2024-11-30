@@ -21,7 +21,7 @@ import LightModeIcon from "@mui/icons-material/LightMode";
 import logo from "./assets/logo.png";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 const Accounts = () => {
   const [darkMode, setDarkMode] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -175,6 +175,8 @@ const Accounts = () => {
         </Box>
         {[{ text: "Dashboard", icon: <DashboardIcon />, path: "/Dashboard" },
           { text: "Settings", icon: <Settings />, path: "/Settings" },
+          { text: "Cart", icon: <Settings />, path: "/Cart"},
+          { text: "Last Order", icon: <ShoppingCartIcon/>, path: "/LastOrders"},
           { text: "Logout", icon: <Logout />, path: "/" }].map((item, index) => (
           <Box
             key={index}
