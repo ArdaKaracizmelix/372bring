@@ -211,7 +211,7 @@ def get_restaurants():
             'address': r.address,
             'opening_hours': r.opening_hours,
             'contact_number': r.contact_number,
-            #'email': r.email
+            'rating': r.rating
         } for r in restaurants]), 200
     except SQLAlchemyError as e:
         return jsonify({"error": str(e)}), 500
@@ -228,6 +228,7 @@ def get_restaurant(id):
             'address': restaurant.address,
             'opening_hours': restaurant.opening_hours,
             'contact_number': restaurant.contact_number,
+            'rating': restaurant.rating
             #'email': restaurant.email
         }), 200
     except SQLAlchemyError as e:

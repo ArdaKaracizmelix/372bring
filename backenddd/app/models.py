@@ -16,6 +16,7 @@ class Restaurants(db.Model):
     name = db.Column(db.String(100), nullable=False)
     opening_hours = db.Column(db.String(50), nullable=False)
     contact_number = db.Column(db.String(20), nullable=False)
+    rating = db.Column(db.Float, nullable=False)
     #email = db.Column(db.String(100), nullable=False)
     menus = db.relationship('Menus', backref='restaurant', lazy=True)
     #promotions = db.relationship('Promotions', backref='restaurant', lazy=True)
