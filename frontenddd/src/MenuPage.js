@@ -85,33 +85,44 @@ const MenuPage = () => {
     const existingItem = cart.find(
       (cartItem) => cartItem.item_name === item.item_name
     );
+    let updatedCart;
     if (existingItem) {
-      setCart(
-        cart.map((cartItem) =>
-          cartItem.item_name === item.item_name
-            ? { ...cartItem, quantity: cartItem.quantity + 1 }
-            : cartItem
-        )
+      updatedCart = cart.map((cartItem) =>
+        cartItem.item_name === item.item_name
+          ? { ...cartItem, quantity: cartItem.quantity + 1 }
+          : cartItem
       );
     } else {
-      setCart([...cart, { ...item, quantity: 1 }]);
+      updatedCart = [
+        ...cart,
+        { item_name: item.item_name, price: item.price, quantity: 1 },
+      ];
     }
+    setCart(updatedCart);
+  
+    // LocalStorage'e yaz
+    localStorage.setItem("cartItems", JSON.stringify(updatedCart));
+    localStorage.setItem("restaurantId", restaurantId); // Restaurant ID'yi ekle
   };
+  
 
   const handleRemoveFromCart = (itemName) => {
     const existingItem = cart.find((cartItem) => cartItem.item_name === itemName);
+    let updatedCart;
     if (existingItem.quantity > 1) {
-      setCart(
-        cart.map((cartItem) =>
-          cartItem.item_name === itemName
-            ? { ...cartItem, quantity: cartItem.quantity - 1 }
-            : cartItem
-        )
+      updatedCart = cart.map((cartItem) =>
+        cartItem.item_name === itemName
+          ? { ...cartItem, quantity: cartItem.quantity - 1 }
+          : cartItem
       );
     } else {
-      setCart(cart.filter((cartItem) => cartItem.item_name !== itemName));
+      updatedCart = cart.filter((cartItem) => cartItem.item_name !== itemName);
     }
-  };
+    setCart(updatedCart);
+  
+    // LocalStorage'i güncelle
+    localStorage.setItem("cartItems", JSON.stringify(updatedCart));
+  };;
 
   const handleApplyPromoCode = () => {
     const matchedPromo = promotions.find(
@@ -127,11 +138,12 @@ const MenuPage = () => {
 
   const calculateTotal = () => {
     const subtotal = cart.reduce(
-      (total, item) => total + item.price * item.quantity,
+      (total, item) => total + item.price * item.quantity, // item.price burada artık düzgün çalışır
       0
     );
     return subtotal - (subtotal * discount) / 100;
   };
+  
 
   return (
     <Box
@@ -422,18 +434,23 @@ const MenuPage = () => {
                     Total: {calculateTotal().toFixed(2)} $
                   </Typography>
                   <Button
-                    variant="contained"
-                    onClick={() => navigate("/Cart")}
-                    sx={{
-                      marginTop: "16px",
-                      backgroundColor: darkMode ? "#666" : "#FF6F61",
-                      "&:hover": {
-                        backgroundColor: darkMode ? "#777" : "#FF6F61",
-                      },
-                    }}
-                  >
-                    Checkout
-                  </Button>
+                      variant="contained"
+                      onClick={() => {
+                        const totalAmount = calculateTotal().toFixed(2);
+                        localStorage.setItem("totalAmount", totalAmount); // Toplam tutarı LocalStorage'a yaz
+                        navigate("/Cart", { state: { total: totalAmount } });
+                      }}
+                      sx={{
+                        marginTop: "16px",
+                        backgroundColor: darkMode ? "#666" : "#FF6F61",
+                        "&:hover": {
+                          backgroundColor: darkMode ? "#777" : "#FF6F61",
+                        },
+                      }}
+                    >
+                      Checkout
+                    </Button>
+
                 </>
               ) : (
                 <Alert severity="info">Your cart is empty.</Alert>

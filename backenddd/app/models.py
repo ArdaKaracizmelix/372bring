@@ -87,10 +87,10 @@ class Drivers(db.Model):
 
     driver_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(100), nullable=False)
-    vehicle_number = db.Column(db.String(50), nullable=False)
     availability_status = db.Column(db.Enum('Available', 'Unavailable', name='availability_status'), default='Available')
     vehicle_details = db.Column(db.Text, nullable=True)
-    delivery_locations = db.relationship('DeliveryLocations', backref='driver', lazy=True)
+    contact = db.Column(db.String(20), nullable=False)
+    current_location = db.Column(Geometry('POINT'), nullable=False)
 
 # Customers Table
 class Customers(db.Model):

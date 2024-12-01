@@ -7,6 +7,9 @@ from shapely.wkt import loads
 from flask import Blueprint
 from flask_cors import CORS
 
+import json
+from flask import jsonify
+
 
 #app = Flask(__name__)
 #routes = Blueprint('routes', __name__)
@@ -475,7 +478,7 @@ def get_driver_location(driver_id):
     except SQLAlchemyError as e:
         return jsonify({"error": str(e)}), 500
     
-import json
+
 @routes.route('/orders', methods=['GET'])
 def get_last_orders():
     try:
@@ -517,7 +520,6 @@ def get_last_orders():
 @routes.route('/orders/<int:customer_id>', methods=['GET'])
 def get_customer_orders(customer_id):
     try:
-  
         query = db.session.query(
             Orders.order_details,
             Orders.timestamps,
@@ -531,13 +533,14 @@ def get_customer_orders(customer_id):
         results = []
 
         for order in orders:
-         
+            order_details_list = []
             if isinstance(order.order_details, str):
                 try:
-                    order_details_list = json.loads(order.order_details) 
+                    order_details_list = json.loads(order.order_details)
                 except json.JSONDecodeError:
-                    order_details_list = []  
-                order_details_list = order.order_details if isinstance(order.order_details, list) else []
+                    pass  # Eğer JSON ayrıştırılamıyorsa, `order_details_list` boş kalır
+            elif isinstance(order.order_details, list):
+                order_details_list = order.order_details
 
             for detail in order_details_list:
                 results.append({
@@ -552,8 +555,7 @@ def get_customer_orders(customer_id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-import json
-from flask import jsonify
+
 
 @routes.route('/restaurants/<int:restaurant_id>/menus', methods=['GET'])
 def get_menus_by_restaurant(restaurant_id):
@@ -593,3 +595,105 @@ def get_menus_by_restaurant(restaurant_id):
         return jsonify(result), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+@routes.route('/drivers/available', methods=['GET'])
+def get_available_drivers():
+    try:
+        # Veritabanında availability_status='Available' olan tüm sürücüleri al
+        available_drivers = Drivers.query.filter_by(availability_status='Available').all()
+
+        # Eğer uygun sürücü yoksa hata döndür
+        if not available_drivers:
+            return jsonify({"message": "No available drivers found."}), 404
+
+        # Sürücülerin bilgilerini JSON formatında döndür
+        return jsonify([
+            {
+                "driver_id": driver.driver_id,
+                "name": driver.name,
+                "contact": driver.contact,
+                "current_location": str(driver.current_location),  # BLOB'dan stringe çevir
+                "availability_status": driver.availability_status,
+                "vehicle_details": driver.vehicle_details
+            }
+            for driver in available_drivers
+        ]), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+from datetime import datetime
+from flask import request, jsonify
+
+@routes.route('/order-and-payment', methods=['POST'])
+def add_order_and_payment():
+    try:
+        data = request.get_json()
+
+        # Zorunlu alanları kontrol et
+        required_fields = ["customer_id", "restaurant_id", "order_details", "payment"]
+        for field in required_fields:
+            if field not in data:
+                raise ValueError(f"Missing required field: {field}")
+
+        # Tip kontrolü
+        try:
+            customer_id = int(data["customer_id"])
+            restaurant_id = int(data["restaurant_id"])
+            order_details = data["order_details"]
+            payment = data["payment"]
+        except ValueError:
+            raise ValueError("Invalid data type for numeric fields.")
+
+        # Order details kontrolü
+        if not isinstance(order_details, list) or not all(
+            "item" in od and "quantity" in od for od in order_details
+        ):
+            raise ValueError("Invalid 'order_details' format. Must be a list of {item: ..., quantity: ...} objects.")
+
+        # Payment kontrolü
+        total_amount = float(payment.get("amount", 0))
+        payment_method = payment.get("method")
+        payment_status = payment.get("status", "Pending")
+
+        if not payment_method or total_amount <= 0:
+            raise ValueError("Invalid payment information. 'method' and positive 'amount' are required.")
+
+        # Orders tablosuna yeni sipariş ekle
+        new_order = Orders(
+            customer_id=customer_id,
+            restaurant_id=restaurant_id,
+            order_details=json.dumps(order_details),
+            order_status=data.get("order_status", "Preparing"),
+            timestamps=datetime.now(),
+        )
+        db.session.add(new_order)
+        db.session.commit()
+
+        # Payments tablosuna yeni ödeme ekle
+        new_payment = Payments(
+            order_id=new_order.order_id,
+            customer_id=customer_id,
+            amount=total_amount,
+            payment_method=payment_method,
+            payment_status=payment_status,
+            timestamp=datetime.now(),
+        )
+        db.session.add(new_payment)
+        db.session.commit()
+
+        return jsonify(
+            {
+                "message": "Order and payment added successfully",
+                "order_id": new_order.order_id,
+                "payment_id": new_payment.payment_id,
+            }
+        ), 201
+
+    except ValueError as ve:
+        db.session.rollback()
+        return jsonify({"error": f"Validation Error: {str(ve)}"}), 400
+
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error in add_order_and_payment: {str(e)}")
+        return jsonify({"error": "An error occurred while processing the request.", "details": str(e)}), 500
+
