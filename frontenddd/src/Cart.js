@@ -151,22 +151,11 @@ const handlePayNow = async () => {
   }
 };
 
-
-
-
-
 const handleButtonClick = () => {
-  handlePayNow(); // Önce ödeme işlemini tetikleyin
-  navigate("/Dashboard"); // Ödeme tamamlandıktan sonra yönlendirme yapın
+  handlePayNow(); 
+  navigate("/Dashboard"); 
 };
-
-
-
-
-
-
-
-    
+  
   return (
     <Box
       sx={{
@@ -180,8 +169,8 @@ const handleButtonClick = () => {
      <SwipeableDrawer
   anchor="left"
   open={drawerOpen}
-  onClose={() => toggleDrawer(false)} // Fonksiyon referansı
-  onOpen={() => toggleDrawer(true)} // Fonksiyon referansı
+  onClose={() => toggleDrawer(false)} 
+  onOpen={() => toggleDrawer(true)} 
   sx={{
     "& .MuiDrawer-paper": {
       width: 240,
@@ -209,7 +198,7 @@ const handleButtonClick = () => {
         filter: darkMode ? "invert(1)" : "none",
         cursor: "pointer",
       }}
-      onClick={() => navigate("/")} // Logo tıklaması ana sayfaya yönlendirir
+      onClick={() => navigate("/")} 
     />
   </Box>
   {/* Sidebar Menüsü */}
@@ -220,7 +209,7 @@ const handleButtonClick = () => {
   ].map((item, index) => (
     <Button
       key={index}
-      onClick={() => navigate(item.path)} // Doğru yönlendirme
+      onClick={() => navigate(item.path)} 
       startIcon={item.icon}
       sx={{
         justifyContent: "flex-start",

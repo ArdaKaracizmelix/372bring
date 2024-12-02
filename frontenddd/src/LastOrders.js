@@ -17,7 +17,7 @@ import {
 } from '@mui/material';
 import {
   Dashboard as DashboardIcon,
-  Settings,
+  
   Logout,
   Menu as MenuIcon,
 } from '@mui/icons-material';
@@ -128,8 +128,7 @@ const LastOrders = () => {
         </Box>
         {[
           { text: 'Dashboard', icon: <DashboardIcon />, path: '/Dashboard' },
-          { text: 'Settings', icon: <Settings />, path: '/Settings' },
-          { text: 'Cart', icon: <ShoppingCartIcon />, path: '/Cart' },
+         
           { text: 'Last Orders', icon: <ShoppingCartIcon />, path: '/LastOrders' },
           { text: 'Logout', icon: <Logout />, path: '/' },
         ].map((item, index) => (

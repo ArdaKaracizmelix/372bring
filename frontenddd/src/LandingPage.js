@@ -56,7 +56,7 @@ const LandingPage = () => {
     height: '60px',
     backgroundColor: darkMode ? '#333' : '#FF6F61',
     display: 'flex',
-    justifyContent: 'space-between', // Eşit aralık için bu özellik
+    justifyContent: 'space-between', 
     alignItems: 'center',
     padding: '0 20px',
     boxShadow: '0 2px 5px rgba(0,0,0,0.3)',
@@ -67,8 +67,8 @@ const LandingPage = () => {
     sx={{
       display: 'flex',
       alignItems: 'center',
-      justifyContent: 'space-between', // Butonları eşit mesafe ile yerleştirir
-      width: '100%', // Box genişliğini %100 yaparak içerikleri yayar
+      justifyContent: 'space-between', 
+      width: '100%', 
     }}
   >
     <Button
@@ -266,7 +266,7 @@ const LandingPage = () => {
     width: '100%',
     padding: '31px 0',
     display: 'flex',
-    justifyContent: 'space-between', // İki tarafı birbirinden ayırır
+    justifyContent: 'space-between',
     alignItems: 'center',
     backgroundColor: darkMode ? '#333' : '#FF6F61',
     borderRadius: '0 0 12px 12px',
@@ -278,7 +278,7 @@ const LandingPage = () => {
       display: 'flex',
       alignItems: 'center',
       gap: 2,
-      paddingLeft: '20px', // Sol kenardan biraz içeri almak için
+      paddingLeft: '20px', 
     }}
   >
     <Typography
@@ -293,7 +293,7 @@ const LandingPage = () => {
     <Box
       sx={{
         display: 'flex',
-        gap: 2, // İkonlar arası boşluk
+        gap: 2, 
       }}
     >
       <Box
@@ -332,7 +332,7 @@ const LandingPage = () => {
       display: 'flex',
       alignItems: 'center',
       gap: 2,
-      paddingRight: '100px', // Sağ kenardan biraz içeri almak için
+      paddingRight: '100px',
     }}
   >
     <Typography
@@ -347,7 +347,7 @@ const LandingPage = () => {
     <Box
       sx={{
         display: 'flex',
-        gap: 2, // İkonlar arası boşluk
+        gap: 2, 
       }}
     >
       <Box
@@ -356,7 +356,7 @@ const LandingPage = () => {
         alt="X"
         sx={{
           width: '60px',
-          height: '40px', // Eşit yükseklik ve genişlik
+          height: '40px', 
           borderRadius: 4,
         }}
       />
@@ -366,7 +366,7 @@ const LandingPage = () => {
         alt="Facebook"
         sx={{
           width: '40px',
-          height: '40px', // Eşit yükseklik ve genişlik
+          height: '40px', 
           borderRadius: 4,
         }}
       />
@@ -376,7 +376,7 @@ const LandingPage = () => {
         alt="Instagram"
         sx={{
           width: '40px',
-          height: '40px', // Eşit yükseklik ve genişlik
+          height: '40px', 
           borderRadius: 4,
         }}
       />

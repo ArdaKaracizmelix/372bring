@@ -4,17 +4,17 @@ from faker import Faker
 from datetime import date, timedelta
 import json
 
-# Establish a connection to the MySQL database
+
 connection = pymysql.connect(
-    host="localhost",          # Assuming MySQL is hosted locally
-    user="root",               # User shown in your connection
-    password="arda",               # Replace with the actual password (if empty, keep it as "")
-    database="onlinefoodordering"     # Database name from your connection
+    host="localhost",          
+    user="root",               
+    password="arda",              
+    database="onlinefoodordering"    
 )
 cursor = connection.cursor()
 faker = Faker()
 
-# Function to print the entries from each table
+
 def print_entries(table_name):
     cursor.execute(f"SELECT * FROM {table_name}")
     rows = cursor.fetchall()
@@ -23,14 +23,14 @@ def print_entries(table_name):
 
 # Populate Restaurants
 def populate_restaurants():
-    for _ in range(50):  # Add 50 restaurants
+    for _ in range(50): 
         name = faker.company()
         address = faker.address().replace("\n", ", ")
         contact_number = faker.phone_number()
         contact_number = contact_number[:20] 
         rating = round(random.uniform(3.0, 5.0), 1)
         opening_hours = "10:00-22:00"
-        delivery_area = "POLYGON((0 0, 10 0, 10 10, 0 10, 0 0))"  # Simple polygon for all
+        delivery_area = "POLYGON((0 0, 10 0, 10 10, 0 10, 0 0))" 
         cursor.execute(
             """
             INSERT INTO Restaurants (name, address, contact_number, rating, opening_hours, delivery_area)
@@ -43,9 +43,9 @@ def populate_restaurants():
 
 # Populate Menus
 def populate_menus():
-    for restaurant_id in range(1, 51):  # Assuming restaurant IDs start at 1
+    for restaurant_id in range(1, 51): 
         menu_items = []
-        for _ in range(random.randint(5, 15)):  # 5-15 menu items per restaurant
+        for _ in range(random.randint(5, 15)): 
             item_name = faker.word().capitalize() + " Dish"
             description = faker.sentence()
             price = round(random.uniform(5.0, 30.0), 2)
@@ -64,7 +64,7 @@ def populate_menus():
 
 # Populate Customers
 def populate_customers():
-    for _ in range(101):  # Add 100 customers
+    for _ in range(101): 
         name = faker.name()
         email = faker.email()
         phone = faker.phone_number()

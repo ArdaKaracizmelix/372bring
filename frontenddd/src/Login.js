@@ -33,7 +33,7 @@ const Login = () => {
   
         navigate('/Dashboard'); 
       } else {
-        alert('Invalid email or password'); // Hata mesajını göster
+        alert('Invalid email or password'); 
       }
     } catch (error) {
       console.error('Error during login:', error);

@@ -36,7 +36,7 @@ const Accounts = () => {
   useEffect(() => {
     const fetchCustomerData = async () => {
       try {
-        const user_id = localStorage.getItem("user_id"); // Assuming customer ID is stored in localStorage
+        const user_id = localStorage.getItem("user_id"); 
         const response = await axios.get(`http://localhost:5000/customers/${user_id}`);
         setCustomerData(response.data);
       } catch (err) {
@@ -242,36 +242,8 @@ const Accounts = () => {
                 label="Address"
                 fullWidth
               />
-              {/* Password change fields */}
-              <TextField
-                type="password"
-                label="Current Password"
-                fullWidth
-                value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
-              />
-              <TextField
-                type="password"
-                label="New Password"
-                fullWidth
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-              />
-              <TextField
-                type="password"
-                label="Confirm New Password"
-                fullWidth
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-              />
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handlePasswordChange}
-                sx={{ marginTop: 2 }}
-              >
-                Change Password
-              </Button>
+              
+             
             </Box>
             
             

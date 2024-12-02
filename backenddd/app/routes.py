@@ -3,7 +3,7 @@ from app.models import db, Restaurants, Menus, Promotions, Orders, Payments, Del
 from sqlalchemy.exc import SQLAlchemyError
 from geoalchemy2.elements import WKBElement
 from geoalchemy2.functions import ST_AsText, ST_SetSRID
-from shapely.wkt import loads
+
 from flask import Blueprint
 from flask_cors import CORS
 
@@ -11,17 +11,11 @@ import json
 from flask import jsonify
 
 
-#app = Flask(__name__)
-#routes = Blueprint('routes', __name__)
+
 routes = Blueprint('routes', __name__)
-#CORS(routes, resources={r"/customers": {"origins": "http://localhost:3000"}})
+
 CORS(routes, resources={r"/*": {"origins": "http://localhost:3000"}})
 
-
-# Initialize the database
-#app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'  # Adjust to your database URI
-#app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-#db.init_app(app)
 
 
 # Add a new restaurant
@@ -51,7 +45,7 @@ def login():
     email = data.get('email')
     password = data.get('password')
     
-    # Kullanıcıyı email ile bul
+
     user = Customers.query.filter_by(email=email).first()
     
     if user and user.password == password:
@@ -61,7 +55,7 @@ def login():
         print("Login failed. Invalid email or password.")
         return jsonify({'message': 'Invalid email or password'}), 401
 
-# Add a new customer
+
 @routes.route('/customers/login', methods=['POST'])
 def add_customerL():
     try:
@@ -69,11 +63,10 @@ def add_customerL():
         new_customer = Customers(
             customer_id=data['customer_id'],
             name=data['name'],
-            email=data.get('email'),  # Optional
-            phone=data.get('phone'),  # Optional
-            address=data.get('address'),  # Optional
-            #location=data['location'],  # Ensure this is in the correct format (e.g., POINT(x y))
-            password=data['password']  # Password should ideally be hashed
+            email=data.get('email'),
+            phone=data.get('phone'), 
+
+            password=data['password']  
         )
         db.session.add(new_customer)
         db.session.commit()
@@ -93,11 +86,6 @@ def get_customersL():
             'email': c.email,
             'phone': c.phone,
             'address': c.address,
-            # Convert location to a readable format (e.g., "POINT(lat lon)")
-            #'location': {
-            #    'longitude': loads(db.session.scalar(ST_AsText(ST_SetSRID(c.location, 4326)))).x,
-            #    'latitude': loads(db.session.scalar(ST_AsText(ST_SetSRID(c.location, 4326)))).y
-            #},
             'password': c.password
         } for c in customers]), 200
     except SQLAlchemyError as e:
@@ -118,7 +106,7 @@ def signup():
         if not data:
             return jsonify({'message': 'No data received'}), 400
 
-        # Giriş verilerini al
+        
         name = data.get('name')
         email = data.get('email')
         password = data.get('password')
@@ -157,7 +145,7 @@ def signup():
         return jsonify({'message': 'Account created successfully!', 'customer_id': new_customer_id}), 201
 
     except Exception as e:
-        print("Error during signup:", str(e))  # Hata mesajını yazdırın
+        print("Error during signup:", str(e))  
         return jsonify({'message': 'Error creating account.', 'error': str(e)}), 500
 @routes.route('/customers/signup', methods=['POST'])
 def add_customerS():
@@ -166,11 +154,11 @@ def add_customerS():
         new_customer = Customers(
             customer_id=data['customer_id'],
             name=data['name'],
-            email=data.get('email'),  # Optional
-            phone=data.get('phone'),  # Optional
-            address=data.get('address'),  # Optional
-            #location=data['location'],  # Ensure this is in the correct format (e.g., POINT(x y))
-            password=data['password']  # Password should ideally be hashed
+            email=data.get('email'), 
+            phone=data.get('phone'),  
+            address=data.get('address'),  
+      
+            password=data['password'] 
         )
         db.session.add(new_customer)
         db.session.commit()
@@ -190,11 +178,7 @@ def get_customersS():
             'email': c.email,
             'phone': c.phone,
             'address': c.address,
-            # Convert location to a readable format (e.g., "POINT(lat lon)")
-            #'location': {
-            #    'longitude': loads(db.session.scalar(ST_AsText(ST_SetSRID(c.location, 4326)))).x,
-            #    'latitude': loads(db.session.scalar(ST_AsText(ST_SetSRID(c.location, 4326)))).y
-            #},
+          
             'password': c.password
         } for c in customers]), 200
     except SQLAlchemyError as e:
@@ -225,14 +209,14 @@ def get_restaurant(id):
     try:
         restaurant = Restaurants.query.get_or_404(id)
         return jsonify({
-            #'id': restaurant.id,
+      
             'restaurant_id': restaurant.restaurant_id,
             'name': restaurant.name,
             'address': restaurant.address,
             'opening_hours': restaurant.opening_hours,
             'contact_number': restaurant.contact_number,
             'rating': restaurant.rating
-            #'email': restaurant.email
+        
         }), 200
     except SQLAlchemyError as e:
         return jsonify({"error": str(e)}), 500
@@ -245,11 +229,11 @@ def add_customer():
         new_customer = Customers(
             customer_id=data['customer_id'],
             name=data['name'],
-            email=data.get('email'),  # Optional
-            phone=data.get('phone'),  # Optional
-            address=data.get('address'),  # Optional
-            #location=data['location'],  # Ensure this is in the correct format (e.g., POINT(x y))
-            password=data['password']  # Password should ideally be hashed
+            email=data.get('email'),  
+            phone=data.get('phone'), 
+            address=data.get('address'), 
+        
+            password=data['password']  
         )
         db.session.add(new_customer)
         db.session.commit()
@@ -269,33 +253,13 @@ def get_customers():
             'email': c.email,
             'phone': c.phone,
             'address': c.address,
-            # Convert location to a readable format (e.g., "POINT(lat lon)")
-            #'location': {
-            #    'longitude': loads(db.session.scalar(ST_AsText(ST_SetSRID(c.location, 4326)))).x,
-            #    'latitude': loads(db.session.scalar(ST_AsText(ST_SetSRID(c.location, 4326)))).y
-            #},
+           
             'password': c.password
         } for c in customers]), 200
     except SQLAlchemyError as e:
         return jsonify({"error": str(e)}), 500
 
-# Get a specific customer by ID
-# @routes.route('/customers/<int:id>', methods=['GET'])
-# def get_customer(id):
-#     try:
-#         customer = Customers.query.get_or_404(id)
-#         return jsonify({
-#             #'id': customer.id,
-#             'customer_id': customer.customer_id,
-#             'name': customer.name,
-#             'email': customer.email,
-#             'phone': customer.phone,
-#             'address': customer.address,
-#             #'location': customer.location,  # Convert to a readable format if necessary
-#             'password': customer.password  # Do not expose passwords in the response
-#         }), 200
-#     except SQLAlchemyError as e:
-#         return jsonify({"error": str(e)}), 500
+
 
 
 @routes.route('/customers/<int:customer_id>', methods=['GET'])
@@ -312,10 +276,7 @@ def get_customer(customer_id):
             'phone': customer.phone,
             'address': customer.address,
            
-            #'location': {
-            #    'longitude': loads(db.session.scalar(ST_AsText(ST_SetSRID(customer.location, 4326)))).x,
-            #    'latitude': loads(db.session.scalar(ST_AsText(ST_SetSRID(customer.location, 4326)))).y
-            #},
+           
         }), 200
     except SQLAlchemyError as e:
         return jsonify({"error": str(e)}), 500
@@ -340,7 +301,7 @@ def add_promotion():
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
     
-# Get all promotions
+
 @routes.route('/promotions', methods=['GET'])
 def get_promotions():
     try:
@@ -394,7 +355,7 @@ def get_restaurant_promotions(restaurant_id):
 @routes.route('/orders', methods=['POST'])
 def add_order():
     try:
-        if not request.is_json:  # Gelen isteğin JSON formatında olup olmadığını kontrol et
+        if not request.is_json: 
             return jsonify({"error": "Unsupported Media Type. Content-Type must be application/json"}), 415
 
         data = request.get_json()
@@ -413,7 +374,6 @@ def add_order():
         return jsonify({"error": str(e)}), 500
 
 
-# Get all orders for a specific customer
 @routes.route('/customers/<int:customer_id>/orders', methods=['GET'])
 def get_orders(customer_id):
     try:
@@ -447,7 +407,7 @@ def add_payment():
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
 
-# Get payment history for a customer
+
 @routes.route('/customers/<int:customer_id>/payments', methods=['GET'])
 def get_payments(customer_id):
     try:
@@ -463,7 +423,7 @@ def get_payments(customer_id):
     except SQLAlchemyError as e:
         return jsonify({"error": str(e)}), 500
 
-# Driver location and delivery status
+
 @routes.route('/drivers/<int:driver_id>/locations', methods=['GET'])
 def get_driver_location(driver_id):
     try:
@@ -538,7 +498,7 @@ def get_customer_orders(customer_id):
                 try:
                     order_details_list = json.loads(order.order_details)
                 except json.JSONDecodeError:
-                    pass  # Eğer JSON ayrıştırılamıyorsa, `order_details_list` boş kalır
+                    pass  
             elif isinstance(order.order_details, list):
                 order_details_list = order.order_details
 
@@ -600,20 +560,20 @@ def get_menus_by_restaurant(restaurant_id):
 @routes.route('/drivers/available', methods=['GET'])
 def get_available_drivers():
     try:
-        # Veritabanında availability_status='Available' olan tüm sürücüleri al
+
         available_drivers = Drivers.query.filter_by(availability_status='Available').all()
 
-        # Eğer uygun sürücü yoksa hata döndür
+   
         if not available_drivers:
             return jsonify({"message": "No available drivers found."}), 404
 
-        # Sürücülerin bilgilerini JSON formatında döndür
+
         return jsonify([
             {
                 "driver_id": driver.driver_id,
                 "name": driver.name,
                 "contact": driver.contact,
-                "current_location": str(driver.current_location),  # BLOB'dan stringe çevir
+                "current_location": str(driver.current_location), 
                 "availability_status": driver.availability_status,
                 "vehicle_details": driver.vehicle_details
             }
@@ -625,79 +585,6 @@ def get_available_drivers():
 from datetime import datetime
 from flask import request, jsonify
 
-# @routes.route('/order-and-payment', methods=['POST'])
-# def add_order_and_payment():
-#     try:
-#         data = request.get_json()
-
-#         # Zorunlu alanları kontrol et
-#         required_fields = ["customer_id", "restaurant_id", "order_details", "payment"]
-#         for field in required_fields:
-#             if field not in data:
-#                 raise ValueError(f"Missing required field: {field}")
-
-#         # Tip kontrolü
-#         try:
-#             customer_id = int(data["customer_id"])
-#             restaurant_id = int(data["restaurant_id"])
-#             order_details = data["order_details"]
-#             payment = data["payment"]
-#         except ValueError:
-#             raise ValueError("Invalid data type for numeric fields.")
-
-#         # Order details kontrolü
-#         if not isinstance(order_details, list) or not all(
-#             "item" in od and "quantity" in od for od in order_details
-#         ):
-#             raise ValueError("Invalid 'order_details' format. Must be a list of {item: ..., quantity: ...} objects.")
-
-#         # Payment kontrolü
-#         total_amount = float(payment.get("amount", 0))
-#         payment_method = payment.get("method")
-#         payment_status = payment.get("status", "Pending")
-
-#         if not payment_method or total_amount <= 0:
-#             raise ValueError("Invalid payment information. 'method' and positive 'amount' are required.")
-
-#         # Orders tablosuna yeni sipariş ekle
-#         new_order = Orders(
-#             customer_id=customer_id,
-#             restaurant_id=restaurant_id,
-#             order_details=json.dumps(order_details),
-#             order_status=data.get("order_status", "Preparing"),
-#             timestamps=datetime.now(),
-#         )
-#         db.session.add(new_order)
-#         db.session.commit()
-
-#         # Payments tablosuna yeni ödeme ekle
-#         new_payment = Payments(
-#             order_id=new_order.order_id,
-#             customer_id=customer_id,
-#             amount=total_amount,
-#             payment_method=payment_method,
-#             payment_status=payment_status,
-#             timestamp=datetime.now(),
-#         )
-#         db.session.add(new_payment)
-#         db.session.commit()
-
-#         return jsonify(
-#             {
-#                 "message": "Order and payment added successfully",
-#                 "order_id": new_order.order_id,
-#                 "payment_id": new_payment.payment_id,
-#             }
-#         ), 201
-
-#     except ValueError as ve:
-#         db.session.rollback()
-#         return jsonify({"error": f"Validation Error: {str(ve)}"}), 400
-
-#     except Exception as e:
-#         db.session.rollback()
-#         print(f"Error in add_order_and_payment: {str(e)}")
-#         return jsonify({"error": "An error occurred while processing the request.", "details": str(e)}), 500
 
 
 from sqlalchemy.exc import SQLAlchemyError
@@ -741,7 +628,7 @@ def add_order_and_payment():
                 timestamps=datetime.now(),
             )
             db.session.add(new_order)
-            db.session.flush()  # Get `new_order.order_id`
+            db.session.flush()  
 
             # Add payment
             new_payment = Payments(
@@ -768,3 +655,7 @@ def add_order_and_payment():
     except SQLAlchemyError as se:
         db.session.rollback()
         return jsonify({"error": f"Database Error: {str(se)}"}), 500
+
+
+
+

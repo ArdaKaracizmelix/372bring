@@ -22,7 +22,6 @@ import {
 } from "@mui/material";
 import {
   Dashboard as DashboardIcon,
-  Settings,
   Logout,
   Menu as MenuIcon,
 } from "@mui/icons-material";
@@ -102,7 +101,7 @@ const MenuPage = () => {
   
     // LocalStorage'e yaz
     localStorage.setItem("cartItems", JSON.stringify(updatedCart));
-    localStorage.setItem("restaurantId", restaurantId); // Restaurant ID'yi ekle
+    localStorage.setItem("restaurantId", restaurantId); 
   };
   
 
@@ -138,7 +137,7 @@ const MenuPage = () => {
 
   const calculateTotal = () => {
     const subtotal = cart.reduce(
-      (total, item) => total + item.price * item.quantity, // item.price burada artık düzgün çalışır
+      (total, item) => total + item.price * item.quantity, 
       0
     );
     return subtotal - (subtotal * discount) / 100;
@@ -446,7 +445,7 @@ const MenuPage = () => {
                       variant="contained"
                       onClick={() => {
                         const totalAmount = calculateTotal().toFixed(2);
-                        localStorage.setItem("totalAmount", totalAmount); // Toplam tutarı LocalStorage'a yaz
+                        localStorage.setItem("totalAmount", totalAmount); 
                         navigate("/Cart", { state: { total: totalAmount } });
                       }}
                       sx={{

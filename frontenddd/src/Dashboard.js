@@ -37,7 +37,6 @@ const Dashboard = () => {
   const [restaurants, setRestaurants] = useState([]);
   const navigate = useNavigate();
 
-  // Restoran verilerini API'den çek
   useEffect(() => {
     const fetchRestaurants = async () => {
       try {
@@ -65,7 +64,6 @@ const Dashboard = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // Restoran navigasyonu
   const handleNextRestaurants = () => {
     if (restaurantIndex + 4 < restaurants.length) {
       setRestaurantIndex(restaurantIndex + 4);
@@ -201,7 +199,7 @@ const Dashboard = () => {
             borderRadius: "12px",
             marginBottom: "20px",
             position: "absolute",
-            top: "50%",
+            top: "55%",
             left: "50%",
             transform: "translate(-50%, -110%)",
           }}
@@ -241,7 +239,7 @@ const Dashboard = () => {
           >
            {restaurants.slice(restaurantIndex, restaurantIndex + 4).map((restaurant) => (
                 <Box
-                  key={restaurant.restaurant_id} // ID bilgisi burada kullanılıyor
+                  key={restaurant.restaurant_id} 
                   sx={{
                     backgroundColor: darkMode ? "#333" : "#fff",
                     padding: 2,
@@ -249,11 +247,11 @@ const Dashboard = () => {
                     textAlign: "center",
                     cursor: "pointer",
                   }}
-                  onClick={() => navigate(`/MenuPage/${restaurant.restaurant_id}`)} // ID ile yönlendirme
+                  onClick={() => navigate(`/MenuPage/${restaurant.restaurant_id}`)} 
                 >
                   <Box
                     component="img"
-                    src={restaurant.image || "default_image_url"} // Restoranın görseli varsa kullan, yoksa varsayılan görsel
+                    src={restaurant.image || "default_image_url"} 
                     alt={restaurant.name}
                     sx={{
                       width: "100%",
