@@ -249,19 +249,7 @@ const Dashboard = () => {
                   }}
                   onClick={() => navigate(`/MenuPage/${restaurant.restaurant_id}`)} 
                 >
-                  <Box
-                    component="img"
-                    src={restaurant.image || "default_image_url"} 
-                    alt={restaurant.name}
-                    sx={{
-                      width: "100%",
-                      height: "150px",
-                      objectFit: "contain",
-                      borderRadius: "8px",
-                      marginBottom: 2,
-                      backgroundColor: darkMode ? "#121212" : "#ffffff",
-                    }}
-                  />
+                  
                   <Typography sx={{ marginTop: 2 }}>{restaurant.name}</Typography>
                 </Box>
               ))}

@@ -199,7 +199,7 @@ const ContactPage = () => {
           </Typography>
           <Box sx={{ display: "flex", alignItems: "center", gap: 2, marginBottom: 2 }}>
             <ContactPhoneSharpIcon />
-            <Typography variant="body1">+123 456 7890</Typography>
+            <Typography variant="body1">+90 535 376 83 11 Cem Bey</Typography>
           </Box>
           <Box sx={{ display: "flex", alignItems: "center", gap: 2, marginBottom: 2 }}>
             <AlternateEmailSharpIcon />
