@@ -768,6 +768,3 @@ def add_order_and_payment():
     except SQLAlchemyError as se:
         db.session.rollback()
         return jsonify({"error": f"Database Error: {str(se)}"}), 500
-
-    except Exception as e:
-        return jsonify({"error": f"AAA {str(e)}"}), 500
