@@ -31,7 +31,7 @@ import LightModeIcon from "@mui/icons-material/LightMode";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
-
+import logo from "./assets/logo.png";
 const MenuPage = () => {
   const [darkMode, setDarkMode] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -176,14 +176,23 @@ const MenuPage = () => {
             padding: "16px",
           }}
         >
-          <Typography variant="h6" onClick={() => navigate("/")}>
-            Bring
-          </Typography>
+    <Box
+            component="img"
+            src={logo}
+            alt="Logo"
+            sx={{
+              width: 80,
+              height: "auto",
+              filter: darkMode ? "invert(1)" : "none",
+            }}
+            onClick={() => navigate("/")}
+          />
         </Box>
+       
         {[
           { text: "Dashboard", icon: <DashboardIcon />, path: "/Dashboard" },
-          { text: "Settings", icon: <Settings />, path: "/Settings" },
-          { text: "Cart", icon: <ShoppingCartIcon />, path: "/Cart" },
+        
+     
           { text: "Last Orders", icon: <ShoppingCartIcon />, path: "/LastOrders" },
           { text: "Logout", icon: <Logout />, path: "/" },
         ].map((item, index) => (

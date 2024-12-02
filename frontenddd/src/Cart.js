@@ -20,10 +20,11 @@ import MenuIcon from "@mui/icons-material/Menu";
 import DarkModeIcon from "@mui/icons-material/DarkMode";
 import LightModeIcon from "@mui/icons-material/LightMode";
 import DashboardIcon from "@mui/icons-material/Dashboard";
-import SettingsIcon from "@mui/icons-material/Settings";
+
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import LogoutIcon from "@mui/icons-material/Logout";
 import axios from "axios";
+import logo from "./assets/logo.png";
 
 const Cart = () => {
   const [totalAmount, setTotalAmount] = useState(0);
@@ -92,56 +93,79 @@ const Cart = () => {
       setSelectedDriver(randomDriver);
     }
   };
- const handlePayNow = async () => {
-      const customerId = localStorage.getItem("user_id");
-      const restaurantId = localStorage.getItem("restaurantId");
-      const storedCart = localStorage.getItem("cartItems");
-      const totalAmount = localStorage.getItem("totalAmount");
-      const orderDetails = storedCart ? JSON.parse(storedCart) : [];
-    
-      if (!customerId || !restaurantId || orderDetails.length === 0) {
-        alert("Invalid order or user information.");
-        return;
-      }
-    
-      const orderData = {
-        customer_id: customerId,
-        restaurant_id: restaurantId,
-        order_details: orderDetails.map((item) => ({
-          item: item.item_name,
-          quantity: item.quantity,
-        })),
-        order_status: "Preparing",
-        driver_id: selectedDriver.driver_id,
-        payment: {
-          amount: totalAmount,
-          method: paymentMethod,
-          status: "Paid",
-        },
-      };
-    
-      try {
-        console.log("Order Data:", orderData); // Debug için loglama
-        const response = await axios.post(
-          "http://localhost:5000/order-and-payment",
-          orderData
-        );
-    
-        if (response.status === 201) {
-          alert("Order and payment processed successfully!");
-          setCart([]);
-          localStorage.removeItem("cartItems");
-          localStorage.removeItem("restaurantId");
-          setTotalAmount(0);
-          setSelectedDriver(null);
-        } else {
-          alert("Failed to process order.");
-        }
-      } catch (error) {
-        console.error("Error processing payment:", error);
-        alert("An error occurred. Please try again.");
-      }
-    };
+
+
+
+
+const handlePayNow = async () => {
+  const customerId = localStorage.getItem("user_id");
+  const restaurantId = localStorage.getItem("restaurantId");
+  const storedCart = localStorage.getItem("cartItems");
+  const totalAmount = parseFloat(localStorage.getItem("totalAmount"));
+  const orderDetails = storedCart ? JSON.parse(storedCart) : [];
+
+  if (!customerId || !restaurantId || orderDetails.length === 0) {
+    alert("Invalid order or user information.");
+    return;
+  }
+
+  if (!selectedDriver) {
+    alert("Please assign a driver before proceeding with payment.");
+    return;
+  }
+
+  const orderData = {
+    customer_id: customerId,
+    restaurant_id: restaurantId,
+    order_details: orderDetails.map((item) => ({
+      item: item.item_name,
+      quantity: item.quantity,
+    })),
+    order_status: "Preparing",
+    driver_id: selectedDriver.driver_id,
+    payment: {
+      amount: totalAmount,
+      method: paymentMethod,
+      status: "Paid",
+    },
+  };
+
+  console.log("Order Data Sent:", orderData);
+
+  try {
+    const response = await axios.post("http://localhost:5000/order-and-payment", orderData);
+
+    if (response.status === 201) {
+      alert("Order and payment processed successfully!");
+      setCart([]);
+      localStorage.removeItem("cartItems");
+      localStorage.removeItem("restaurantId");
+      setTotalAmount(0);
+      setSelectedDriver(null);
+    } else {
+      alert("Failed to process order.");
+    }
+  } catch (error) {
+    console.error("Error processing payment:", error.response?.data || error.message);
+    alert(`Error: ${error.response?.data?.error || "An error occurred."}`);
+  }
+};
+
+
+
+
+
+const handleButtonClick = () => {
+  handlePayNow(); // Önce ödeme işlemini tetikleyin
+  navigate("/Dashboard"); // Ödeme tamamlandıktan sonra yönlendirme yapın
+};
+
+
+
+
+
+
+
     
   return (
     <Box
@@ -153,49 +177,61 @@ const Cart = () => {
         flexDirection: "column",
       }}
     >
-      {/* Sidebar */}
-      <SwipeableDrawer
-        anchor="left"
-        open={drawerOpen}
-        onClose={toggleDrawer(false)}
-        onOpen={toggleDrawer(true)}
-        sx={{
-          "& .MuiDrawer-paper": {
-            width: 240,
-            backgroundColor: darkMode ? "#333" : "#FF6F61",
-            color: darkMode ? "#f5f5f5" : "#ffffff",
-          },
-        }}
-      >
-        <Box
+     <SwipeableDrawer
+  anchor="left"
+  open={drawerOpen}
+  onClose={() => toggleDrawer(false)} // Fonksiyon referansı
+  onOpen={() => toggleDrawer(true)} // Fonksiyon referansı
+  sx={{
+    "& .MuiDrawer-paper": {
+      width: 240,
+      backgroundColor: darkMode ? "#333" : "#FF6F61",
+      color: darkMode ? "#f5f5f5" : "#ffffff",
+    },
+  }}
+>
+<Box
           sx={{
             display: "flex",
-            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
             padding: "16px",
-            gap: 2,
           }}
         >
-          {[{ text: "Dashboard", icon: <DashboardIcon />, path: "/Dashboard" },
-            { text: "Settings", icon: <SettingsIcon />, path: "/Settings" },
-            { text: "Cart", icon: <ShoppingCartIcon />, path: "/Cart" },
-            { text: "Last Orders", icon: <ShoppingCartIcon />, path: "/LastOrders" },
-            { text: "Logout", icon: <LogoutIcon />, path: "/" }
-          ].map((item, index) => (
-            <Button
-              key={index}
-              onClick={() => navigate(item.path)}
-              startIcon={item.icon}
-              sx={{
-                justifyContent: "flex-start",
-                color: "#fff",
-                "&:hover": { backgroundColor: darkMode ? "#555" : "#ff896b" },
-              }}
-            >
-              {item.text}
-            </Button>
-          ))}
-        </Box>
-      </SwipeableDrawer>
+    {/* Logo */}
+    <Box
+      component="img"
+      src={logo}
+      alt="Logo"
+      sx={{
+        width: 80,
+        height: "auto",
+        filter: darkMode ? "invert(1)" : "none",
+        cursor: "pointer",
+      }}
+      onClick={() => navigate("/")} // Logo tıklaması ana sayfaya yönlendirir
+    />
+  </Box>
+  {/* Sidebar Menüsü */}
+  {[
+    { text: "Dashboard", icon: <DashboardIcon />, path: "/Dashboard" },
+    { text: "Last Order", icon: <ShoppingCartIcon />, path: "/LastOrders" },
+    { text: "Logout", icon: <LogoutIcon />, path: "/" },
+  ].map((item, index) => (
+    <Button
+      key={index}
+      onClick={() => navigate(item.path)} // Doğru yönlendirme
+      startIcon={item.icon}
+      sx={{
+        justifyContent: "flex-start",
+        color: "#fff",
+        "&:hover": { backgroundColor: darkMode ? "#555" : "#ff896b" },
+      }}
+    >
+      {item.text}
+    </Button>
+  ))}
+</SwipeableDrawer>
 
       {/* AppBar */}
       <AppBar
@@ -269,10 +305,10 @@ const Cart = () => {
               label="Payment Method"
             >
               <MenuItem value="cash">Cash</MenuItem>
-              <MenuItem value="credit_card">Credit Card</MenuItem>
+              <MenuItem value="Credit Card">Credit Card</MenuItem>
             </Select>
           </FormControl>
-          {paymentMethod === "credit_card" && (
+          {paymentMethod === "Credit Card" && (
             <>
               <TextField
                 label="Card Number"
@@ -302,7 +338,7 @@ const Cart = () => {
     marginTop: "16px",
     "&:hover": { backgroundColor: "#FF896B" },
   }}
-  onClick={handlePayNow}
+  onClick={handleButtonClick}
   disabled={loading}
 >
   {loading ? "Processing..." : "Pay Now"}

@@ -12,7 +12,6 @@ import {
 import {
   Menu as MenuIcon,
   Dashboard as DashboardIcon,
-  Settings,
   Logout,
   ArrowForwardIos,
   ArrowBackIos,
@@ -125,8 +124,6 @@ const Dashboard = () => {
         </Box>
         {[
           { text: "Dashboard", icon: <DashboardIcon />, path: "/Dashboard" },
-          { text: "Settings", icon: <Settings />, path: "/Settings" },
-          { text: "Cart", icon: <ShoppingCartIcon />, path: "/Cart" },
           { text: "Last Order", icon: <ShoppingCartIcon />, path: "/LastOrders" },
           { text: "Logout", icon: <Logout />, path: "/" },
         ].map((item, index) => (

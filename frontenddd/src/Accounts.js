@@ -12,7 +12,7 @@ import {
 } from "@mui/material";
 import {
   Dashboard as DashboardIcon,
-  Settings,
+
   Logout,
   Menu as MenuIcon,
 } from "@mui/icons-material";
@@ -58,30 +58,7 @@ const Accounts = () => {
     setDrawerOpen(open);
   };
 
-  const handleSaveChanges = async () => {
-    // Update the user's information (name, phone, email, etc.)
-    try {
-      const user_id = localStorage.getItem("user_id");
-      const updatedData = {
-        name: customerData.name,
-        phone: customerData.phone,
-        email: customerData.email,
-        address: customerData.address,
-      };
-
-      // Send updated user data to the backend
-      const response = await axios.put(`http://localhost:5000/customers/${user_id}`, updatedData);
-
-      if (response.status === 200) {
-        alert("Changes saved successfully!");
-      } else {
-        alert("Failed to save changes.");
-      }
-    } catch (err) {
-      console.error("Error saving changes:", err);
-      alert("Error saving changes.");
-    }
-  };
+  
 
   const handlePasswordChange = async () => {
     if (newPassword !== confirmPassword) {
@@ -109,25 +86,7 @@ const Accounts = () => {
     }
   };
 
-  const handleAccountDeletion = async () => {
-    if (window.confirm("Are you sure you want to delete your account? This action cannot be undone.")) {
-      try {
-        const user_id = localStorage.getItem("user_id");
-        const response = await axios.delete(`http://localhost:5000/customers/${user_id}`);
-
-        if (response.status === 200) {
-          alert("Account deleted successfully.");
-          localStorage.removeItem("user_id");
-          navigate("/"); // Redirect to home or login page
-        } else {
-          alert("Failed to delete account.");
-        }
-      } catch (err) {
-        console.error("Error deleting account:", err);
-        alert("Error deleting account.");
-      }
-    }
-  };
+ 
 
   return (
     <Box
@@ -174,8 +133,6 @@ const Accounts = () => {
           />
         </Box>
         {[{ text: "Dashboard", icon: <DashboardIcon />, path: "/Dashboard" },
-          { text: "Settings", icon: <Settings />, path: "/Settings" },
-          { text: "Cart", icon: <Settings />, path: "/Cart"},
           { text: "Last Order", icon: <ShoppingCartIcon/>, path: "/LastOrders"},
           { text: "Logout", icon: <Logout />, path: "/" }].map((item, index) => (
           <Box
@@ -316,24 +273,8 @@ const Accounts = () => {
                 Change Password
               </Button>
             </Box>
-            <Button
-              variant="outlined"
-              color="error"
-              fullWidth
-              sx={{ marginTop: 2 }}
-              onClick={handleAccountDeletion}
-            >
-              Delete Account
-            </Button>
-            <Button
-              variant="contained"
-              color="primary"
-              fullWidth
-              sx={{ marginTop: 2 }}
-              onClick={handleSaveChanges}
-            >
-              Save Changes
-            </Button>
+            
+            
           </Box>
         )}
       </Box>

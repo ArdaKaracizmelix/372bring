@@ -38,7 +38,7 @@ const AboutPage = () => {
           height: '60px',
           backgroundColor: darkMode ? '#333' : '#FF6F61',
           display: 'flex',
-          justifyContent: 'space-between', // Eşit aralık için bu özellik
+          justifyContent: 'space-between', 
           alignItems: 'center',
           padding: '0 20px',
           boxShadow: '0 2px 5px rgba(0,0,0,0.3)',
@@ -49,8 +49,8 @@ const AboutPage = () => {
           sx={{
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'space-between', // Butonları eşit mesafe ile yerleştirir
-            width: '100%', // Box genişliğini %100 yaparak içerikleri yayar
+            justifyContent: 'space-between', 
+            width: '100%', 
           }}
         >
           <Button
