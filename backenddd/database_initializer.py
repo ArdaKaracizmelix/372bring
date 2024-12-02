@@ -78,7 +78,7 @@ def populate_customers():
             INSERT INTO Customers (name, email, phone, address, location, password)
             VALUES (%s, %s, %s, %s, ST_GeomFromText(%s), %s)
             """,
-            (name, email, phone, address, location, password)  # Insert password
+            (name, email, phone, address, location, password)  
         )
     
     connection.commit()

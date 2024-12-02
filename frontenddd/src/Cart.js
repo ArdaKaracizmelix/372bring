@@ -92,56 +92,124 @@ const Cart = () => {
       setSelectedDriver(randomDriver);
     }
   };
- const handlePayNow = async () => {
-      const customerId = localStorage.getItem("user_id");
-      const restaurantId = localStorage.getItem("restaurantId");
-      const storedCart = localStorage.getItem("cartItems");
-      const totalAmount = localStorage.getItem("totalAmount");
-      const orderDetails = storedCart ? JSON.parse(storedCart) : [];
+//  const handlePayNow = async () => {
+//       const customerId = localStorage.getItem("user_id");
+//       const restaurantId = localStorage.getItem("restaurantId");
+//       const storedCart = localStorage.getItem("cartItems");
+//       const totalAmount = localStorage.getItem("totalAmount");
+//       const orderDetails = storedCart ? JSON.parse(storedCart) : [];
     
-      if (!customerId || !restaurantId || orderDetails.length === 0) {
-        alert("Invalid order or user information.");
-        return;
-      }
+//       if (!customerId || !restaurantId || orderDetails.length === 0) {
+//         alert("Invalid order or user information.");
+//         return;
+//       }
     
-      const orderData = {
-        customer_id: customerId,
-        restaurant_id: restaurantId,
-        order_details: orderDetails.map((item) => ({
-          item: item.item_name,
-          quantity: item.quantity,
-        })),
-        order_status: "Preparing",
-        driver_id: selectedDriver.driver_id,
-        payment: {
-          amount: totalAmount,
-          method: paymentMethod,
-          status: "Paid",
-        },
-      };
+//       const orderData = {
+//         customer_id: customerId,
+//         restaurant_id: restaurantId,
+//         order_details: orderDetails.map((item) => ({
+//           item: item.item_name,
+//           quantity: item.quantity,
+//         })),
+//         order_status: "Preparing",
+//         driver_id: selectedDriver.driver_id,
+//         payment: {
+//           amount: totalAmount,
+//           method: paymentMethod,
+//           status: "Paid",
+//         },
+//       };
     
-      try {
-        console.log("Order Data:", orderData); // Debug için loglama
-        const response = await axios.post(
-          "http://localhost:5000/order-and-payment",
-          orderData
-        );
+//       try {
+//         console.log("Order Data:", orderData); // Debug için loglama
+//         const response = await axios.post(
+//           "http://localhost:5000/order-and-payment",
+//           orderData
+//         );
     
-        if (response.status === 201) {
-          alert("Order and payment processed successfully!");
-          setCart([]);
-          localStorage.removeItem("cartItems");
-          localStorage.removeItem("restaurantId");
-          setTotalAmount(0);
-          setSelectedDriver(null);
-        } else {
-          alert("Failed to process order.");
-        }
-      } catch (error) {
-        console.error("Error processing payment:", error);
-        alert("An error occurred. Please try again.");
-      }
-    };
+//         if (response.status === 201) {
+//           alert("Order and payment processed successfully!");
+//           setCart([]);
+//           localStorage.removeItem("cartItems");
+//           localStorage.removeItem("restaurantId");
+//           setTotalAmount(0);
+//           setSelectedDriver(null);
+//         } else {
+//           alert("Failed to process order.");
+//         }
+//       } catch (error) {
+//         console.error("Error processing payment:", error);
+//         alert("An error occurred. Please try again.");
+//       }
+//     };
+
+
+
+
+
+const handlePayNow = async () => {
+  const customerId = localStorage.getItem("user_id");
+  const restaurantId = localStorage.getItem("restaurantId");
+  const storedCart = localStorage.getItem("cartItems");
+  const totalAmount = parseFloat(localStorage.getItem("totalAmount"));
+  const orderDetails = storedCart ? JSON.parse(storedCart) : [];
+
+  if (!customerId || !restaurantId || orderDetails.length === 0) {
+    alert("Invalid order or user information.");
+    return;
+  }
+
+  if (!selectedDriver) {
+    alert("Please assign a driver before proceeding with payment.");
+    return;
+  }
+
+  const orderData = {
+    customer_id: customerId,
+    restaurant_id: restaurantId,
+    order_details: orderDetails.map((item) => ({
+      item: item.item_name,
+      quantity: item.quantity,
+    })),
+    order_status: "Preparing",
+    driver_id: selectedDriver.driver_id,
+    payment: {
+      amount: totalAmount,
+      method: paymentMethod,
+      status: "Paid",
+    },
+  };
+
+  console.log("Order Data Sent:", orderData);
+
+  try {
+    const response = await axios.post("http://localhost:5000/order-and-payment", orderData);
+
+    if (response.status === 201) {
+      alert("Order and payment processed successfully!");
+      setCart([]);
+      localStorage.removeItem("cartItems");
+      localStorage.removeItem("restaurantId");
+      setTotalAmount(0);
+      setSelectedDriver(null);
+    } else {
+      alert("Failed to process order.");
+    }
+  } catch (error) {
+    console.error("Error processing payment:", error.response?.data || error.message);
+    alert(`Error: ${error.response?.data?.error || "An error occurred."}`);
+  }
+};
+
+
+
+
+
+
+
+
+
+
     
   return (
     <Box
@@ -269,10 +337,10 @@ const Cart = () => {
               label="Payment Method"
             >
               <MenuItem value="cash">Cash</MenuItem>
-              <MenuItem value="credit_card">Credit Card</MenuItem>
+              <MenuItem value="Credit Card">Credit Card</MenuItem>
             </Select>
           </FormControl>
-          {paymentMethod === "credit_card" && (
+          {paymentMethod === "Credit Card" && (
             <>
               <TextField
                 label="Card Number"

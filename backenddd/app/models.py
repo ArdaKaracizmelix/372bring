@@ -67,7 +67,7 @@ class Orders(db.Model):
     order_details = db.Column(db.JSON, nullable=False)  # JSON data for order items
     order_status = db.Column(db.Enum('Preparing', 'Pending', 'Completed', 'Cancelled','On the Way','Delivered',name='order_status'), nullable=False)
     timestamps = db.Column(db.DateTime, default=db.func.current_timestamp(), nullable=False)
-    menu_data = db.Column(db.JSON, nullable=False)  # Menu items for the order
+    #menu_data = db.Column(db.JSON, nullable=False)  # Menu items for the order
     #availability_status = db.Column(db.Enum('Available', 'Unavailable', name='availability_status'), default='Available')
 
 # Delivery Locations Table

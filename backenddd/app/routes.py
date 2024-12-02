@@ -595,6 +595,8 @@ def get_menus_by_restaurant(restaurant_id):
         return jsonify(result), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+    
+
 @routes.route('/drivers/available', methods=['GET'])
 def get_available_drivers():
     try:
@@ -623,33 +625,104 @@ def get_available_drivers():
 from datetime import datetime
 from flask import request, jsonify
 
+# @routes.route('/order-and-payment', methods=['POST'])
+# def add_order_and_payment():
+#     try:
+#         data = request.get_json()
+
+#         # Zorunlu alanları kontrol et
+#         required_fields = ["customer_id", "restaurant_id", "order_details", "payment"]
+#         for field in required_fields:
+#             if field not in data:
+#                 raise ValueError(f"Missing required field: {field}")
+
+#         # Tip kontrolü
+#         try:
+#             customer_id = int(data["customer_id"])
+#             restaurant_id = int(data["restaurant_id"])
+#             order_details = data["order_details"]
+#             payment = data["payment"]
+#         except ValueError:
+#             raise ValueError("Invalid data type for numeric fields.")
+
+#         # Order details kontrolü
+#         if not isinstance(order_details, list) or not all(
+#             "item" in od and "quantity" in od for od in order_details
+#         ):
+#             raise ValueError("Invalid 'order_details' format. Must be a list of {item: ..., quantity: ...} objects.")
+
+#         # Payment kontrolü
+#         total_amount = float(payment.get("amount", 0))
+#         payment_method = payment.get("method")
+#         payment_status = payment.get("status", "Pending")
+
+#         if not payment_method or total_amount <= 0:
+#             raise ValueError("Invalid payment information. 'method' and positive 'amount' are required.")
+
+#         # Orders tablosuna yeni sipariş ekle
+#         new_order = Orders(
+#             customer_id=customer_id,
+#             restaurant_id=restaurant_id,
+#             order_details=json.dumps(order_details),
+#             order_status=data.get("order_status", "Preparing"),
+#             timestamps=datetime.now(),
+#         )
+#         db.session.add(new_order)
+#         db.session.commit()
+
+#         # Payments tablosuna yeni ödeme ekle
+#         new_payment = Payments(
+#             order_id=new_order.order_id,
+#             customer_id=customer_id,
+#             amount=total_amount,
+#             payment_method=payment_method,
+#             payment_status=payment_status,
+#             timestamp=datetime.now(),
+#         )
+#         db.session.add(new_payment)
+#         db.session.commit()
+
+#         return jsonify(
+#             {
+#                 "message": "Order and payment added successfully",
+#                 "order_id": new_order.order_id,
+#                 "payment_id": new_payment.payment_id,
+#             }
+#         ), 201
+
+#     except ValueError as ve:
+#         db.session.rollback()
+#         return jsonify({"error": f"Validation Error: {str(ve)}"}), 400
+
+#     except Exception as e:
+#         db.session.rollback()
+#         print(f"Error in add_order_and_payment: {str(e)}")
+#         return jsonify({"error": "An error occurred while processing the request.", "details": str(e)}), 500
+
+
+from sqlalchemy.exc import SQLAlchemyError
+
 @routes.route('/order-and-payment', methods=['POST'])
 def add_order_and_payment():
     try:
         data = request.get_json()
 
-        # Zorunlu alanları kontrol et
+        # Validation...
         required_fields = ["customer_id", "restaurant_id", "order_details", "payment"]
         for field in required_fields:
             if field not in data:
                 raise ValueError(f"Missing required field: {field}")
 
-        # Tip kontrolü
-        try:
-            customer_id = int(data["customer_id"])
-            restaurant_id = int(data["restaurant_id"])
-            order_details = data["order_details"]
-            payment = data["payment"]
-        except ValueError:
-            raise ValueError("Invalid data type for numeric fields.")
+        customer_id = int(data["customer_id"])
+        restaurant_id = int(data["restaurant_id"])
+        order_details = data["order_details"]
+        payment = data["payment"]
 
-        # Order details kontrolü
         if not isinstance(order_details, list) or not all(
             "item" in od and "quantity" in od for od in order_details
         ):
             raise ValueError("Invalid 'order_details' format. Must be a list of {item: ..., quantity: ...} objects.")
 
-        # Payment kontrolü
         total_amount = float(payment.get("amount", 0))
         payment_method = payment.get("method")
         payment_status = payment.get("status", "Pending")
@@ -657,28 +730,29 @@ def add_order_and_payment():
         if not payment_method or total_amount <= 0:
             raise ValueError("Invalid payment information. 'method' and positive 'amount' are required.")
 
-        # Orders tablosuna yeni sipariş ekle
-        new_order = Orders(
-            customer_id=customer_id,
-            restaurant_id=restaurant_id,
-            order_details=json.dumps(order_details),
-            order_status=data.get("order_status", "Preparing"),
-            timestamps=datetime.now(),
-        )
-        db.session.add(new_order)
-        db.session.commit()
+        # Use a single transaction
+        with db.session.begin():
+            # Add order
+            new_order = Orders(
+                customer_id=customer_id,
+                restaurant_id=restaurant_id,
+                order_details=json.dumps(order_details),
+                order_status=data.get("order_status", "Preparing"),
+                timestamps=datetime.now(),
+            )
+            db.session.add(new_order)
+            db.session.flush()  # Get `new_order.order_id`
 
-        # Payments tablosuna yeni ödeme ekle
-        new_payment = Payments(
-            order_id=new_order.order_id,
-            customer_id=customer_id,
-            amount=total_amount,
-            payment_method=payment_method,
-            payment_status=payment_status,
-            timestamp=datetime.now(),
-        )
-        db.session.add(new_payment)
-        db.session.commit()
+            # Add payment
+            new_payment = Payments(
+                order_id=new_order.order_id,
+                customer_id=customer_id,
+                amount=total_amount,
+                payment_method=payment_method,
+                payment_status=payment_status,
+                timestamp=datetime.now(),
+            )
+            db.session.add(new_payment)
 
         return jsonify(
             {
@@ -689,11 +763,13 @@ def add_order_and_payment():
         ), 201
 
     except ValueError as ve:
-        db.session.rollback()
         return jsonify({"error": f"Validation Error: {str(ve)}"}), 400
 
-    except Exception as e:
+    except SQLAlchemyError as se:
         db.session.rollback()
-        print(f"Error in add_order_and_payment: {str(e)}")
-        return jsonify({"error": "An error occurred while processing the request.", "details": str(e)}), 500
+        return jsonify({"error": f"Database Error: {str(se)}"}), 500
+
+    except Exception as e:
+        return jsonify({"error": f"AAA {str(e)}"}), 500
+
 
